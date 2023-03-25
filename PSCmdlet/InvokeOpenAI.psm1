@@ -344,6 +344,8 @@ Form :  $($form | ConvertTo-Json)
                 $openAIResponse.Response = $response.text
             }
         }
+
+        $Global:LastOpenAIResponse = $openAIResponse
         return $openAIResponse
     }
 }
