@@ -1,2 +1,4 @@
 *.key
-ignored/*
+**/obj/*
+**/bin/*
+[Ii]gnored/*
