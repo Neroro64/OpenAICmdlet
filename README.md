@@ -206,8 +206,7 @@ Invoke-OpenAI -Task:ImageGeneration -Prompt:"A happy man eating hot dog" -ImageS
 ```
 ![the_generated_image]( resources/a_happy_man_eating_hot_dog.png )
 
-## To tests the module
-
-
-
-
+## To run the tests
+```powershell
+Invoke-Pester PSCmdlet/Tests/InvokeOpenAI.Tests.ps1 -Output Detailed
+```
