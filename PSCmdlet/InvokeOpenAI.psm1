@@ -293,12 +293,14 @@ Form :  $($form | ConvertTo-Json)
 "@, "Invoke OpenAI API")) {
         try {
             if ($form) {
-                $response = Invoke-WebRequest -Uri:$uri -Method:Post -Headers:$header  -Form $form
+                $response = Invoke-WebRequest -Uri:$uri -Method:Post -Headers:$header -Form $form
+                return $response
             }
             else {
                 $payload = $body | ConvertTo-Json
                 $response = Invoke-WebRequest -Uri:$uri -Method:Post -Headers:$header -Body:$payload
-                #"$response = Get-Content $PSScriptRoot/Tests/MockChatResponse.json | ConvertFrom-Json
+                return response
+                # $response = Get-Content $PSScriptRoot/Tests/MockChatResponse.json | ConvertFrom-Json
             }
         }
         catch {

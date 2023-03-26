@@ -4,7 +4,7 @@
     <View>
       <Name>InvokeOpenAI.OpenAIResponse</Name>
       <ViewSelectedBy>
-        <TypeName>InvokeOpenAI.OpenAIResponse</TypeName>
+        <TypeName>OpenAIResponse</TypeName>
       </ViewSelectedBy>
       <ListControl>
         <ListEntries>
