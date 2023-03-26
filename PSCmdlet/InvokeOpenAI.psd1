@@ -69,7 +69,7 @@
     # NestedModules = @()
 
     # Functions to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no functions to export.
-    FunctionsToExport = @( "Set-OpenAIAPIKey", "Get-OpenAIAPIKey", "Invoke-OpenAI", "Get-OpenAIFile")
+    FunctionsToExport = @("Set-OpenAIAPIKe", "Get-OpenAIAPIKe", "Get-OpenAIFil", "Invoke-OpenAIReques", "Invoke-OpenAITex", "Invoke-OpenAIImag", "Invoke-OpenAIAudio")
 
     # Cmdlets to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no cmdlets to export.
     CmdletsToExport   = @()
@@ -78,7 +78,7 @@
     VariablesToExport = ''
 
     # Aliases to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no aliases to export.
-    AliasesToExport   = @("openai")
+    AliasesToExport   = @("ai", "aiimg", "aiaudio")
 
     # DSC resources to export from this module
     # DscResourcesToExport = @()
