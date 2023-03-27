@@ -1,13 +1,36 @@
 # OpenAI Cmdlet
-A simple PowerShell cmdlet for invoking OpenAI API. 
+A simple PowerShell cmdlet for invoking OpenAI API to perfom and automate text, image and speect-to-text related tasks. 
+
+```powershell
+# The following command is equivalent to 
+# Invoke-OpenAIText -Prompt "..." -Mode:ChatGPT -Temperature:0 -Samples:1
+ai @"
+> Convert this text to a programmatic command:
+>
+> Example: Ask Constance if we need some bread
+> Output: send-msg `find constance` Do we need some bread?
+>
+> Reach out to the ski store and figure out if I can get my skis fixed before I leave on Thursday
+> "@
+```
+```
+Prompt   : Convert this text to a programmatic command:
+
+           Example: Ask Constance if we need some bread
+           Output: send-msg
+                            ind constance Do we need some bread?
+
+           Reach out to the ski store and figure out if I can get my skis fixed before I leave on Thursday
+Response : {send-msg ind ski-store Can I get my skis fixed before I leave on Thursday?}
+```
 
 For API details, please check [OpenAI API Documentation](https://platform.openai.com/docs/introduction/overview)
 
 For more usage examples, please check [OpenAI API Examples](https://platform.openai.com/examples)
 
 ## Requirements
-- [ OpenAI API Key ]( https://openai.com/blog/openai-api )
-- [ PowerShell >= 7.3.3](https://github.com/PowerShell/powershell/releases)
+- [OpenAI API Key]( https://openai.com/blog/openai-api )
+- [PowerShell >= 7.3.3](https://github.com/PowerShell/powershell/releases)
 
 ## Getting started
 ### Import the module
@@ -19,14 +42,87 @@ Import-Module OpenAICmdlet/PSCmdlet/InvokeOpenAI.psd1
 Set-OpenAIAPIKey
 > Enter your API key: : ********
 "Success! The API key is encrypted and stored in $ENV:OPENAI_API_KEY (default: $PSScriptRoot/OpenAI_API.key)"
+
+# You add this module to your PowerShell profile, to be auto-imported upon start-up
+# Linux
+Add-Content -Path $Home/.config/powershell/Microsoft.PowerShell_profile.ps1 -Value "Import-Module $((Get-Location).Path)/OpenAICmdlet/PSCmdlet/InvokeOpenAI:psd1"
+# Windows
+Add-Content -Path $Home/Documents/PowerShell/Microsoft.PowerShell_profile.ps1 -Value "Import-Module $((Get-Location).Path)/OpenAICmdlet/PSCmdlet/InvokeOpenAI:psd1"
 ```
 
-### Chat example
-NOTE: The last returned response is automatically stored in `$Global:LastOpenAIResponse` and the last chat conversation is stored in `$Global:LastChatGPTConversation`.
+## Usage
+NOTE: All responses in the PowerShell session are automatically stored in `$Global:OpenAIResponses` and the last chat conversation is stored in `$Global:LastChatGPTConversation`. So you can always review them and save them to disk if necessary.
+
+Use `Get-Help <CommandName> -Full` to learn more about the syntax of the command and see more examples.
+
+### -WhatIf
+You can alwasy preview the content of the API request by appending `-WhatIf` flag to the command (ie. dry-run)
+
 ```powershell
-Invoke-OpenAI -Task:"Chat" -Prompt:"Help me learn dotnet Dependency injection" -Temperature:1 -MaxTokens:500 -Samples:1 -StopSequences:"\n" | % Response
+ai "Generate prompts for creative ai arts" -WhatIf
+```
+
+```
+What if: Performing the operation "Invoke OpenAI API" on target "Text completion with maximum estimated tokens: 206 => $2E-06".
+What if: Performing the operation "Invoke OpenAI API Request" on target "https://api.openai.com/v1/chat/completions with
+---
+Header : {
+  "Content-Type": "application/json",
+  "Authorization": "Bearer <Your API KEY>"
+}
+---
+Body :  {
+  "messages": [
+    {
+      "content": "You are a helpful assistant",
+      "role": "system"
+    },
+    {
+      "content": "Generate prompts for creative ai arts",
+      "role": "user"
+    }
+  ],
+  "model": "gpt-3.5-turbo",
+  "top_p": 1.0,
+  "max_tokens": 200,
+  "temperature": 0.0,
+  "n": 1
+}
+---
+Form :  null
+---".
+```
+
+### `Invoke-OpenAIText` (Text completion) [Alias='ai']
+A simple PowerShell function for invoking OpenAI's API to perform the text related tasks such as
+text/code completion, summarize, explanation etc. (default mode: ChatGPT)
+
+For more details, see https://platform.openai.com/docs/guides/completion
+
+By default, it uses ChatGPT mode (model=`gpt-3.5-turbo`) because it perform similar to `text-davinci-003` on general tasks at 10% of the price.
+
+---
+#### **Text Generation**
+```powershell
+ai "Generate prompts for creative ai arts"
+```
+```
+Prompt   : Generate prompts for creative ai arts
+Response : {1. Create an abstract painting inspired by the colors of a sunset.
+           2. Design a futuristic cityscape using geometric shapes and neon colors.
+           3. Generate a portrait of a person using only lines and shapes.
+           4. Create a landscape painting of a forest in autumn.
+           5. Design a surrealistic scene with floating objects and distorted perspectives.
+           6. Generate a digital collage of different textures and patterns.
+           7. Create a minimalist illustration of a city skyline at night.
+           8. Design a pattern inspired by the shapes and colors of a flower garden.
+           9. Generate a digital sculpture of an animal using abstract shapes.
+           10. Create a mixed media artwork using both traditional and digital techniques.}
 ```
 ---
+```powershell
+ai -Prompt:"Help me learn dotnet Dependency injection" -Temperature:1 -MaxTokens:500 -Samples:1 -StopSequences:"`n"
+```
 >Sure, I can help you with that!
 >
 >In .NET, Dependency Injection (DI) is a design pattern that helps developers achieve loosely coupled code, which is more maintainable, testable, and extensible. DI allows developers to inject dependencies (such as interface contracts) into their code rather than creating the dependencies themselves.
@@ -41,65 +137,12 @@ Invoke-OpenAI -Task:"Chat" -Prompt:"Help me learn dotnet Dependency injection" -
 >    void DoSomething();
 >}
 >```
->
->2. Implement the dependency:
->
->```c#
->public class MyService : IMyService
->{
->    public void DoSomething()
->    {
->        Console.WriteLine("Did something!");
->    }
->}
->```
->
->3. In the class where you want to use the dependency, create a constructor that takes the dependency as a parameter:
->
->```c#
->public class MyClass
->{
->    private readonly IMyService _myService;
->
->    public MyClass(IMyService myService)
->    {
->        _myService = myService;
->    }
->
->    public void MyMethod()
->    {
->        _myService.DoSomething();
->    }
->}
->```
->
->4. Register the dependency with the dependency injection container:
->
->```c#
->services.AddScoped<IMyService, MyService>();
->```
->
->5. In the code that uses the class, inject the dependency using the dependency injection container:
->
->```c#
->public static void Main(string[] args)
->{
->    var serviceProvider = new ServiceCollection()
->        .AddScoped<IMyService, MyService>()
->        .BuildServiceProvider();
->
->    var myClass = new MyClass(serviceProvider.GetService<IMyService>());
->    myClass.MyMethod();
->}
->```
->
->This is just a basic example, but there's a lot more to learn about DI and how to use it effectively. I hope this helps as a starting point!
-
+>... 
 ---
-To continue chatting
+#### To continue chatting
 
 ```powershell
-Invoke-OpenAI -Task:"Chat" -Prompt:"Show me more complex examples" -Temperature:1 -MaxTokens:500 -Samples:1 -StopSequences:"\n" | % Reponse
+ai "Show me more complex examples" -ContinueLastConversation
 ```
 > Sure, here's a more complex example that involves multiple dependencies and configuration:
 > 
@@ -116,97 +159,58 @@ Invoke-OpenAI -Task:"Chat" -Prompt:"Show me more complex examples" -Temperature:
 >     void DoSomethingElse();
 > }
 > ```
-> 
-> 2. Implement the dependencies:
-> 
-> ```c#
-> public class MyService1 : IMyService1
-> {
->     public void DoSomething()
->     {
->         Console.WriteLine("Did something!");
->     }
-> }
-> 
-> public class MyService2 : IMyService2
-> {
->     private readonly string _configValue;
-> 
->     public MyService2(IConfiguration configuration)
->     {
->         _configValue = configuration["MyConfigValue"];
->     }
-> 
->     public void DoSomethingElse()
->     {
->         Console.WriteLine($"Did something else with config value: {_configValue}");
->     }
-> }
-> ```
-> 
-> 3. In the class where you want to use the dependencies, create a constructor that takes the dependencies as parameters:
-> 
-> ```c#
-> public class MyClass
-> {
->     private readonly IMyService1 _myService1;
->     private readonly IMyService2 _myService2;
-> 
->     public MyClass(IMyService1 myService1, IMyService2 myService2)
->     {
->         _myService1 = myService1;
->         _myService2 = myService2;
->     }
-> 
->     public void MyMethod()
->     {
->         _myService1.DoSomething();
->         _myService2.DoSomethingElse();
->     }
-> }
-> ```
-> 
-> 4. Register the dependencies and the configuration with the dependency injection container:
-> 
-> ```c#
-> services.AddScoped<IMyService1, MyService1>();
-> services.AddScoped<IMyService2, MyService2>();
-> services.AddSingleton<IConfiguration>(_ => new ConfigurationBuilder()
->     .AddJsonFile("appsettings.json")
->     .Build());
-> ```
-> 
-> 5. In the code that uses the class, inject the dependencies using the dependency injection container:
-> 
-> ```c#
-> public static void Main(string[] args)
-> {
->     var serviceProvider = new ServiceCollection()
->         .AddScoped<IMyService1, MyService1>()
->         .AddScoped<IMyService2, MyService2>()
->         .AddSingleton<IConfiguration>(_ => new ConfigurationBuilder()
->             .AddJsonFile("appsettings.json")
->             .Build())
->         .BuildServiceProvider();
-> 
->     var myClass = new MyClass(
->         serviceProvider.GetService<IMyService1>(),
->         serviceProvider.GetService<IMyService2>());
->     myClass.MyMethod();
-> }
-> ```
-> 
-> This example shows how DI can be used to inject multiple dependencies, including dependencies that require configuration values. Again, this is just scratching the surface of DI, but I hope it helps you understand how it can be used in a more complex scenario.
+> ...
 
 
-### Image generation example
+### `Invoke-OpenAIImage` (Image generation) [Alias='aiimg']
+A simple PowerShell function for invoking OpenAI's API to perform the image related tasks such as
+image generation from text prompt, image edits and image variation. (default mode: Generation)
+
+For more details, see https://platform.openai.com/docs/guides/images/introduction
+
+---
+
 ```powershell
-Invoke-OpenAI -Task:ImageGeneration -Prompt:"A happy man eating hot dog" -ImageSize:"256x256" | Select Response -First 1 | Start-process
-# The response contains an url to the generated image. By pipling this url to Start-Process we can open the link in the browser
+aiimg "A happy man eating hot dog" | Select Response -First 1 | Start-process
+# The response contains an url to the generated image. By pipling this url to Start-Process we can open the link in a browser
 ```
 ![the_generated_image]( resources/a_happy_man_eating_hot_dog.png )
 
-## To run the tests
+---
+
 ```powershell
+# Use one of the prompt that we generated above.
+aiimg "Create a landscape painting of a forest in autumn." | Select Response -First 1 | Start-process
+```
+![the_painting]( resources/generated_img.png )
+
+---
+
+```powershell
+# Use the generated image as input to generate more variations
+aiimg -Mode:Variation -ImagePath:"resources/generated_img.png" -ImageSize:"256x256" | Select Response -First 1 | Start-process
+```
+![the_painting]( resources/generated_img_variation.png )
+
+### `Invoke-OpenAIAudio` (Speech-to-text) [Alias='aiaudio']
+A simple PowerShell function for invoking OpenAI's API to perform the speech-to-text related tasks such as
+transcription and translation. (default mode: Transcription)
+
+For details, see https://platform.openai.com/docs/guides/speech-to-text
+
+---
+
+```powershell
+aiaudio -Mode:Transcription -AudioPath:"resources/f7879738_nohash_0.wav" -AudioLanguage:en
+```
+
+```
+Prompt   :
+Response : {down,}
+```
+
+## Tests
+```powershell
+# To run the unit tests
 Invoke-Pester PSCmdlet/Tests/InvokeOpenAI.Tests.ps1 -Output Detailed
 ```

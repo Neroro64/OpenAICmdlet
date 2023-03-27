@@ -69,7 +69,7 @@
     # NestedModules = @()
 
     # Functions to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no functions to export.
-    FunctionsToExport = @("Set-OpenAIAPIKe", "Get-OpenAIAPIKe", "Get-OpenAIFil", "Invoke-OpenAIReques", "Invoke-OpenAITex", "Invoke-OpenAIImag", "Invoke-OpenAIAudio")
+    FunctionsToExport = @("Set-OpenAIAPIKey", "Get-OpenAIAPIKey", "Get-OpenAIFile", "Invoke-OpenAIRequest", "Invoke-OpenAIText", "Invoke-OpenAIImage", "Invoke-OpenAIAudio")
 
     # Cmdlets to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no cmdlets to export.
     CmdletsToExport   = @()

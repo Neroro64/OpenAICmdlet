@@ -14,6 +14,7 @@ function Set-OpenAIAPIKey {
     $apiKey = Read-Host -Prompt "Enter your API key: " -AsSecureString 
     $apiKey = ConvertFrom-SecureString -SecureString $apiKey -Key $EncryptionKey
     $apiKey | Set-Content $FilePath
+    $ENV:OPENAI_API_KEY ??= $FilePath
     Write-Host "Success! The API key is encrypted and stored in $FilePath" -ForegroundColor Green
 }
 
@@ -36,6 +37,7 @@ function Get-OpenAIAPIKey {
     }
     $DecryptionKey = [int[]] (Get-Random -SetSeed 2048 -Maximum ([byte]::MaxValue) -Count 16)
     $key = Get-Content $FilePath | ConvertTo-SecureString -Key $DecryptionKey
+    $ENV:OPENAI_API_KEY ??= $FilePath
     return $key
 }
 
@@ -63,21 +65,31 @@ function Get-OpenAIFile {
 }
 <#
 .SYNOPSIS
-A basic function for building an OpenAI API request
-
+The basic function for building an OpenAI API request
 
 .PARAMETER Endpoint
-Tne OpenAI API endpoint to interact. 
+Tne OpenAI API endpoint to interact with.
 
 .PARAMETER Body
 The request body
 
 .PARAMETER Form
-The request form
+The request form for uploading files
 
 .PARAMETER APIKey
-Your OpenAI API Key as SecureString
+(Optional) Your OpenAI API Key as SecureString.
+See Set-OpenAIAPIKey
 
+.NOTES
+ENDPOINT	MODEL NAME	
+/v1/chat/completions	gpt-4, gpt-4-0314, gpt-4-32k, gpt-4-32k-0314, gpt-3.5-turbo, gpt-3.5-turbo-0301	
+/v1/completions	text-davinci-003, text-davinci-002, text-curie-001, text-babbage-001, text-ada-001, davinci, curie, babbage, ada	
+/v1/edits	text-davinci-edit-001, code-davinci-edit-001	
+/v1/audio/transcriptions	whisper-1	
+/v1/audio/translations	whisper-1	
+/v1/fine-tunes	davinci, curie, babbage, ada	
+/v1/embeddings	text-embedding-ada-002, text-search-ada-doc-001	
+/v1/moderations	text-moderation-stable, text-moderation-latest
 #>
 function Invoke-OpenAIRequest {
     [OutputType([OpenAIResponse])]
@@ -123,11 +135,11 @@ Form :  $($Form | ConvertTo-Json)
         $header["Authorization"] = "Bearer $(ConvertFrom-SecureString -SecureString $APIKey -AsPlainText)"
         try {
             if ($PSCmdlet.ParameterSetName -eq "Form") {
-                $response = Invoke-WebRequest -Uri:$Endpoint -Method:Post -Headers:$header -Form:$form -WhatIf
+                $response = Invoke-WebRequest -Uri:$Endpoint -Method:Post -Headers:$header -Form:$form
             }
             else {
                 $payload = $body | ConvertTo-Json
-                $response = Invoke-WebRequest -Uri:$EndPoint -Method:Post -Headers:$header -Body:$payload -Whatif
+                $response = Invoke-WebRequest -Uri:$EndPoint -Method:Post -Headers:$header -Body:$payload
             }
             return $response
         }
@@ -142,49 +154,68 @@ Form :  $($Form | ConvertTo-Json)
 
 <#
 .SYNOPSIS
-Short description
+A simple PowerShell function for invoking OpenAI's API to perform the text related tasks
 
 .DESCRIPTION
-Long description
+A simple PowerShell function for invoking OpenAI's API to perform the text related tasks such as
+text/code completion, summarize, explanation etc.
+For details, see https://platform.openai.com/docs/guides/completion
 
 .PARAMETER Prompt
-Parameter description
+The prompt(s) to generate completions for, encoded as a string
 
 .PARAMETER Mode
-Parameter description
+Text completion mode.  Note:'ChatGPT' performs similar to 'TextCompletion' at 10% the price.
 
 .PARAMETER FilePath
-Parameter description
+Path to a text file with extra context
 
 .PARAMETER MaxTokens
-Parameter description
+The maximum number of tokens to generate in the completion.
 
 .PARAMETER Temperature
-Parameter description
+What sampling temperature to use, between 0 and 2. Higher values like 0.8 will make the output more random, while lower values like 0.2 will make it more focused and deterministic.
 
 .PARAMETER Top_P
-Parameter description
+An alternative to sampling with temperature, called nucleus sampling, where the model considers the results of the tokens with top_p probability mass. So 0.1 means only the tokens comprising the top 10% probability mass are considered.
 
 .PARAMETER ChatInitInstruction
-Parameter description
+This instruction sets the initial setting of the chat model
 
 .PARAMETER StopSequences
-Parameter description
+Up to 4 sequences where the API will stop generating further tokens. The returned text will not contain the stop sequence.
 
 .PARAMETER ContinueLastConversation
-Parameter description
+Continue on the last conversation
 
 .PARAMETER Samples
-Parameter description
+Number of images that should be generated
 
 .PARAMETER APIKey
-Parameter description
+(optional)  Your OpenAI API key as SecureString
+See Set-OpenAIAPIKey
 
 .EXAMPLE
-An example
+Invoke-OpenAIText -Prompt:"Say this is a test" -Mode:TextCompletion -Temperature:0 -MaxTokens:7 -Samples:1 -StopSequences:"`n"
+> This is indeed a test!
+
+.EXAMPLE
+Invoke-OpenAIText -Prompt:"Hello!" -Mode:ChatGPT -Top_P:0 -MaxTokens:200 -Samples:1 -StopSequences:"`n"
+> Hello there, how may I assist you today?
+
+.EXAMPLE
+ai Generate prompts for creative ai arts
+>   1. Create an abstract painting inspired by the colors of a sunset.
+    2. Design a futuristic cityscape using geometric shapes and neon colors.
+    3. Generate a portrait of a person using only lines and shapes.
+    4. Create a landscape painting of a forest in autumn.
+    5. Design a surrealistic scene with floating objects and distorted perspectives.
 
 .NOTES
-General notes
+All the responses are automatically stored in `$Global:OpenAIResponses`.
+The last chat conversation is stored in `$Global:LastChatGPTConersation`
+For more examples, check https://platform.openai.com/examples
+
 #>
 function Invoke-OpenAIText {
     [OutputType([OpenAIResponse])]
@@ -198,7 +229,7 @@ function Invoke-OpenAIText {
         [ValidateLength(0, 4096)]
         [string] $Prompt,
 
-        [Parameter(HelpMessage = "Text completion mode.  Note:'Chat' performs similar to 'TextCompletion' at 10% the price.")]
+        [Parameter(HelpMessage = "Text completion mode.  Note:'ChatGPT' performs similar to 'TextCompletion' at 10% the price.")]
         [ValidateSet("TextCompletion", "ChatGPT")]
         [string] $Mode = "ChatGPT",
 
@@ -272,7 +303,7 @@ function Invoke-OpenAIText {
             $uri += "chat/completions"
             $body["model"] = "gpt-3.5-turbo"
             if ($ContinueLastConversation -and $Global:LastChatGPTConversation) {
-                $body["messages"] = $Global:LastChatGPTConversation + @{
+                $body["messages"] = $Global:LastChatGPTConversation.ToArray() + @{
                     role    = "user"
                     content = $Prompt
                 }
@@ -291,10 +322,14 @@ function Invoke-OpenAIText {
     }
 
     $tokenCost = $Prompt.Split().Count + $Samples * $MaxTokens 
-    $cost = $tokenCost * ($Mode -eq "ChatGPT")? 0.002 / 1000 : 0.02 / 1000
-    if ($Global:LastChatGPTConversation) {
-        $Global:LastChatGPTConversation | ForEach-Object { $_.Content.Split().Count } | Measure-Object -Sum
+    if ($ContinueLastConversation -and $Global:LastChatGPTConversation) {
+        $tokenCost += $Global:LastChatGPTConversation
+        | ForEach-Object { $_.Content.Split().Count }
+        | Measure-Object -Sum
+        | Select-Object -ExpandProperty Sum
     }
+    $cost = $tokenCost * ($Mode -eq "ChatGPT")? 0.002 / 1000 : 0.02 / 1000
+
     if ($PSCmdlet.ShouldProcess("Text completion with maximum estimated tokens: $tokenCost => `$$([math]::Round($cost, 6))", "Invoke OpenAI API")) {
         $response = Invoke-OpenAIRequest -Endpoint:$uri -Body:$body -APIKey:$APIKey
         if ($null -eq $response) {
@@ -312,9 +347,10 @@ function Invoke-OpenAIText {
         }
         else {
             if ($Mode -eq "ChatGPT") {
-                $Global:LastChatGPTConversation = [System.Collections.ArrayList]::new(@($body["messages"]) + @($response.choices | ForEach-Object {
-                            @{role = $_.Message.role; content = $_.Message.content }
-                        }))
+                $Global:LastChatGPTConversation = [System.Collections.ArrayList]::new($body["messages"])
+                $response.choices | ForEach-Object {
+                    [void]$Global:LastChatGPTConversation.Add(@{role = $_.Message.role; content = $_.Message.content })
+                }
             }
         }
 
@@ -344,37 +380,46 @@ function Invoke-OpenAIText {
 
 <#
 .SYNOPSIS
-Short description
+A simple PowerShell function for invoking OpenAI's API to perform the image related tasks
 
 .DESCRIPTION
-Long description
+A simple PowerShell function for invoking OpenAI's API to perform the image related tasks such as
+image generation from text prompt, image edits and image variation
+For details, see https://platform.openai.com/docs/guides/images/introduction
 
 .PARAMETER Prompt
-Parameter description
+The prompt(s) to generate images or guide image edits
 
 .PARAMETER Mode
-Parameter description
+Image generation mode
 
 .PARAMETER ImagePath
-Parameter description
+Path to the input image file
 
 .PARAMETER ImageSize
-Parameter description
+The size of the generated image
 
 .PARAMETER ImageMaskPath
-Parameter description
+Path to the image mask file
 
 .PARAMETER Samples
-Parameter description
+Number of images that should be generated
 
 .PARAMETER APIKey
-Parameter description
+(optional)  Your OpenAI API key as SecureString
+See Set-OpenAIAPIKey
 
 .EXAMPLE
-An example
+Invoke-OpenAIImage -Mode:Generation -Prompt:"A cute baby sea otter" -ImageSize:"512x512" -Samples:1 
+> https://url-to-the-image
+
+.EXAMPLE
+aiimg -Mode:Edit -Prompt:"A cute baby sea otter wearing a beret" -ImagePath:"otter.png" -ImageMaskPath:"mask.png" -Samples:1 -ImageSize:"512x512" 
+> https://url-to-the-image
 
 .NOTES
-General notes
+All the responses are automatically stored in `$Global:OpenAIResponses`.
+For more examples, check https://platform.openai.com/examples
 #>
 function Invoke-OpenAIImage {
     [OutputType([OpenAIResponse])]
@@ -475,8 +520,7 @@ For this task, the following image file must be provided:
     $cost = $Samples * $imageGenerationCostModel[$ImageSize]
     if ($PSCmdlet.ShouldProcess("Image $Mode with estimated cost: `$$cost", "Invoke OpenAI API")) {
         if ($Mode -eq "Generation") {
-            $payload = $body | ConvertTo-Json
-            $response = Invoke-OpenAIRequest -Endpoint:$uri -Body:$payload -APIKey:$APIKey
+            $response = Invoke-OpenAIRequest -Endpoint:$uri -Body:$body -APIKey:$APIKey
         }
         else {
             $response = Invoke-OpenAIRequest -Endpoint:$uri -Form:$form -APIKey:$APIKey
@@ -514,34 +558,43 @@ For this task, the following image file must be provided:
 
 <#
 .SYNOPSIS
-Short description
+A simple PowerShell function for invoking OpenAI's API to perform the speech-to-text tasks 
 
 .DESCRIPTION
-Long description
+A simple PowerShell function for invoking OpenAI's API to perform the speech-to-text related tasks such as
+transcription and translation.
+For details, see https://platform.openai.com/docs/guides/speech-to-text
 
 .PARAMETER Prompt
-Parameter description
+The prompt(s) to guide the mode's style or continue on previous audio segment
 
 .PARAMETER Mode
-Parameter description
+Speect-to-text task
 
 .PARAMETER Temperature
-Parameter description
+What sampling temperature to use, between 0 and 2. Higher values like 0.8 will make the output more random, while lower values like 0.2 will make it more focused and deterministic.
 
 .PARAMETER AudioPath
-Parameter description
+Path to the input audio file
 
 .PARAMETER AudioLanguage
-Parameter description
+The language of the input audio. Supplying the input language in ISO-639-1 format will improve accuracy and latency.
 
 .PARAMETER APIKey
-Parameter description
+(optional)  Your OpenAI API key as SecureString
+See Set-OpenAIAPIKey
 
 .EXAMPLE
-An example
+Invoke-OpenAIAudio -Mode:Transcription -AudioPath:"hello_world.mp3" -AudioLanguage:en -Temperature:1 
+> "Hello world!"
+
+.EXAMPLE
+aiaudio -Mode:Translation -AudioPath:"hej_världen.mp3" -AudioLanguage:sv
+> "Hello world!"
 
 .NOTES
-General notes
+All the responses are automatically stored in `$Global:OpenAIResponses`.
+For more examples, check https://platform.openai.com/examples
 #>
 function Invoke-OpenAIAudio {
     [OutputType([OpenAIResponse])]
@@ -549,22 +602,24 @@ function Invoke-OpenAIAudio {
     [Alias("aiaudio")]
     param (
         [Parameter(
+            Mandatory,
+            Position = 0,
             ValueFromPipeline, ValueFromPipelineByPropertyName,
-            HelpMessage = "The prompt(s) to guide the mode's style or continue on previous audio segment")]
-        [ValidateLength(0, 4096)]
-        [string] $Prompt,
+            HelpMessage = "Path to the input audio file")]
+        [ValidatePattern("(.\.mp3$)|(.\.mp4$)|(.\.mpeg$)|(.\.wav$)|(.\.webm$)")]
+        [string] $AudioPath,
 
-        [Parameter(HelpMessage = "Image generation mode")]
+        [Parameter(HelpMessage = "Speect-to-text task")]
         [ValidateSet("Transcription", "Translation")]
         [string] $Mode = "Transcription",
+
+        [Parameter(HelpMessage = "The prompt(s) to guide the mode's style or continue on previous audio segment")]
+        [ValidateLength(0, 4096)]
+        [string] $Prompt,
 
         [Parameter(HelpMessage = "What sampling temperature to use, between 0 and 2. Higher values like 0.8 will make the output more random, while lower values like 0.2 will make it more focused and deterministic.")]
         [ValidateRange(0.0, 2.0)]
         [float] $Temperature = 0,
-
-        [Parameter(HelpMessage = "Path to the input audio file")]
-        [ValidatePattern("(.\.mp3$)|(.\.mp4$)|(.\.mpeg$)|(.\.wav$)|(.\.webm$)")]
-        [string] $AudioPath,
 
         [Parameter(HelpMessage = "The language of the input audio. Supplying the input language in ISO-639-1 format will improve accuracy and latency.")]
         [string] $AudioLanguage,
