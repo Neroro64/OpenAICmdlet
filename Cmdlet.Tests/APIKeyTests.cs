@@ -9,7 +9,7 @@ public class APIKeyTest
           Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
           "OpenAICmdlet/API.key");
 
-    [TestInitialize]
+    [TestCleanup]
     public void ClearLocalFiles()
     {
         if (File.Exists(localAPIKeyPath))
@@ -23,12 +23,21 @@ public class APIKeyTest
     [TestMethod]
     public void T1_CanSetNewAPIKey()
     {
-        var mock = new Mock<SetOpenAIAPIKey>() { CallBase = true };
+        var mock = new Mock<MockSetAPIKeyCommand>() { CallBase = true };
         mock.Setup(x => x.ReadConsoleLine(It.IsAny<string>())).Returns("abcd1234").Verifiable();
         mock.Setup(x => x.ShouldProcess(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>())).Returns(true);
         var setKeyCmd = mock.Object;
-        var a = setKeyCmd.Invoke();
+        setKeyCmd.TestEndProcessing();
         Assert.IsTrue(File.Exists(localAPIKeyPath));
         mock.Verify();
+    }
+
+
+    public class MockSetAPIKeyCommand : SetOpenAIAPIKeyCommand
+    {
+        public void TestEndProcessing()
+        {
+            base.EndProcessing();
+        }
     }
 }

@@ -1,9 +1,11 @@
 using System.Security.Cryptography;
+using System;
+using System.Runtime.CompilerServices;
 namespace OpenAICmdlet;
 
 [Cmdlet(VerbsCommon.Set, "OpenAIAPIKey",
 SupportsShouldProcess = true, ConfirmImpact = ConfirmImpact.High)]
-public class SetOpenAIAPIKey : MyCmdlet
+public class SetOpenAIAPIKeyCommand : MyCmdlet
 {
     [Parameter()]
     public string Path { get; init; } =
@@ -42,10 +44,8 @@ public class SetOpenAIAPIKey : MyCmdlet
                     }
                 }
             }
-            WriteVerbose($"Successfully saved encrypted OpenAI API key to {Path}");
         }
     }
-
 
     private void createParentDirectories(string path)
     {
