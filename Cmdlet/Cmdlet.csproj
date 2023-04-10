@@ -7,5 +7,7 @@
     <AssemblyName>OpenAICmdlet</AssemblyName>
   </PropertyGroup>
 
-  <PackageReference Include="System.Management.Automation" Version="7.4.0-preview.2" />
+  <ItemGroup>
+    <PackageReference Include="System.Management.Automation" Version="7.3.3" />
+  </ItemGroup>
 </Project>
