@@ -1,6 +1,4 @@
 using System.Security.Cryptography;
-using System;
-using System.Runtime.CompilerServices;
 namespace OpenAICmdlet;
 
 [Cmdlet(VerbsCommon.Set, "OpenAIAPIKey",
@@ -41,6 +39,7 @@ public class SetOpenAIAPIKeyCommand : MyCmdlet
                     using (StreamWriter streamWriter = new(cryptoStream))
                     {
                         streamWriter.Write(ReadConsoleLine(prompt: "Enter your API Key: "));
+                        WriteVerbose($"Successfully saved your API key to {Path}");
                     }
                 }
             }

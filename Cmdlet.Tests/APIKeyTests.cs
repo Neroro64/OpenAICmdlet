@@ -5,12 +5,12 @@ namespace Cmdlet.Tests;
 [TestClass]
 public class APIKeyTest
 {
-    private readonly string localAPIKeyPath = System.IO.Path.Join(
+    private static readonly string localAPIKeyPath = System.IO.Path.Join(
           Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
           "OpenAICmdlet/API.key");
 
-    [TestCleanup]
-    public void ClearLocalFiles()
+    [ClassCleanup]
+    public static void ClearLocalFiles()
     {
         if (File.Exists(localAPIKeyPath))
         {
@@ -21,23 +21,20 @@ public class APIKeyTest
     }
 
     [TestMethod]
-    public void T1_CanSetNewAPIKey()
+    public void CanSetAndGetAPIKey()
     {
-        var mock = new Mock<MockSetAPIKeyCommand>() { CallBase = true };
-        mock.Setup(x => x.ReadConsoleLine(It.IsAny<string>())).Returns("abcd1234").Verifiable();
+        var apiKey = "abcd1234";
+        var mock = new Mock<SetOpenAIAPIKeyCommand>() { CallBase = true };
+        mock.Setup(x => x.ReadConsoleLine(It.IsAny<string>())).Returns(apiKey).Verifiable();
         mock.Setup(x => x.ShouldProcess(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>())).Returns(true);
         var setKeyCmd = mock.Object;
-        setKeyCmd.TestEndProcessing();
+        var returnedObjCount = setKeyCmd.Invoke<object>().Count();
+        Assert.AreEqual(returnedObjCount, 0);
         Assert.IsTrue(File.Exists(localAPIKeyPath));
         mock.Verify();
-    }
 
-
-    public class MockSetAPIKeyCommand : SetOpenAIAPIKeyCommand
-    {
-        public void TestEndProcessing()
-        {
-            base.EndProcessing();
-        }
+        var getKeyCmd = new GetOpenAIAPIKeyCommand();
+        var res = getKeyCmd.Invoke<string>().First();
+        Assert.IsNotNull(res, apiKey);
     }
 }
