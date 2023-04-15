@@ -3,9 +3,9 @@ using Moq;
 namespace Cmdlet.Tests;
 
 [TestClass]
-public class APIKeyTest
+public class APIKeyTests
 {
-    private static readonly string localAPIKeyPath = System.IO.Path.Join(
+    public static readonly string localAPIKeyPath = System.IO.Path.Join(
           Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
           "OpenAICmdlet/API.key");
 

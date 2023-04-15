@@ -11,10 +11,4 @@ public class MyCmdlet : Cmdlet
     {
         return base.ShouldProcess(verboseDescription, verboseWarning, caption);
     }
-    public virtual void TestInvoke()
-    {
-        BeginProcessing();
-        ProcessRecord();
-        EndProcessing();
-    }
 }
