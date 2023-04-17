@@ -24,7 +24,7 @@ public class APIKeyTests
     public void CanSetAndGetAPIKey()
     {
         var apiKey = "abcd1234";
-        var mock = new Mock<SetOpenAIAPIKeyCommand>() { CallBase = true };
+        var mock = new Mock<SetOpenAIKeyCommand>() { CallBase = true };
         mock.Setup(x => x.ReadConsoleLine(It.IsAny<string>())).Returns(apiKey).Verifiable();
         mock.Setup(x => x.ShouldProcess(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>())).Returns(true);
         var setKeyCmd = mock.Object;
@@ -33,8 +33,9 @@ public class APIKeyTests
         Assert.IsTrue(File.Exists(localAPIKeyPath));
         mock.Verify();
 
-        var getKeyCmd = new GetOpenAIAPIKeyCommand();
+        var getKeyCmd = new GetOpenAIKeyCommand();
         var res = getKeyCmd.Invoke<string>().First();
-        Assert.IsNotNull(res, apiKey);
+        Assert.IsNotNull(res);
+        Assert.AreEqual(res, apiKey);
     }
 }
