@@ -1,8 +1,9 @@
 using System.Security.Cryptography;
-using OpenAICmdlet;
+namespace OpenAICmdlet;
 
 internal static class SecureAPIKey
 {
+    private static ReaderWriterLock _rwLock = new();
     internal static string DefaultAPIKeyPath =
     System.Environment.GetEnvironmentVariable("OPENAI_APIKEY")
     ?? System.IO.Path.Join(
@@ -19,13 +20,21 @@ internal static class SecureAPIKey
         {
             (aes.Key, aes.IV) = aesInitPair;
             ICryptoTransform encryptor = aes.CreateEncryptor();
-            using (FileStream fileStream = File.Open(path, FileMode.Create))
+            _rwLock.AcquireWriterLock(Constant.RW_LOCK_TIMEOUT_MS);
+            try
             {
-                using (var cryptoStream = new CryptoStream(fileStream, encryptor, CryptoStreamMode.Write))
-                using (var streamWriter = new StreamWriter(cryptoStream))
+                using (FileStream fileStream = File.Open(path, FileMode.Create))
                 {
-                    streamWriter.Write(apiKey);
+                    using (var cryptoStream = new CryptoStream(fileStream, encryptor, CryptoStreamMode.Write))
+                    using (var streamWriter = new StreamWriter(cryptoStream))
+                    {
+                        streamWriter.Write(apiKey);
+                    }
                 }
+            }
+            finally
+            {
+                _rwLock.ReleaseWriterLock();
             }
         }
     }
@@ -40,24 +49,31 @@ internal static class SecureAPIKey
         {
             (aes.Key, aes.IV) = aesInitPair;
             ICryptoTransform decryptor = aes.CreateDecryptor();
-            using (FileStream fileStream = File.OpenRead(path))
+            _rwLock.AcquireWriterLock(Constant.RW_LOCK_TIMEOUT_MS);
+            try
             {
-                using (var cryptoStream = new CryptoStream(fileStream, decryptor, CryptoStreamMode.Read))
-                using (var streamReader = new StreamReader(cryptoStream))
+                using (FileStream fileStream = File.OpenRead(path))
                 {
-                    string apiKey = streamReader.ReadToEnd();
-                    return apiKey;
+                    using (var cryptoStream = new CryptoStream(fileStream, decryptor, CryptoStreamMode.Read))
+                    using (var streamReader = new StreamReader(cryptoStream))
+                    {
+                        string apiKey = streamReader.ReadToEnd();
+                        return apiKey;
+                    }
                 }
             }
+            finally
+            {
+                _rwLock.ReleaseWriterLock();
+            }
         }
-
     }
     private static readonly Lazy<Random> _randomGenerator = new(() =>
         new Random(
             System.Reflection.Assembly
             .GetExecutingAssembly()
             .GetName().Version?.ToString()
-            .GetHashCode() ?? 3374));
+            .GetHashCode() ?? Constant.MAGIC_SEED));
 
     private static (byte[], byte[]) aesInitPair => (_aesKey.Value, _aesIV.Value);
     private static readonly Lazy<byte[]> _aesKey = new(() => generateRandomByteArray());

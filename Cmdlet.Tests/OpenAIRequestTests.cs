@@ -1,0 +1,27 @@
+using OpenAICmdlet;
+namespace OpenAICmdlet.Tests;
+
+[TestClass]
+public class OpenAIRequestTests
+{
+    [TestMethod]
+    public void CanInvokeRequest()
+    {
+        var mockMsgHandler = new WebRequest.MockHandler((request) =>
+        {
+            return new HttpResponseMessage(System.Net.HttpStatusCode.OK)
+            {
+                Content = new StringContent(MockOpenAIResponseData.CompletionResponse),
+            };
+        });
+
+        WebRequest.AddHttpClient(SecureAPIKey.DefaultAPIKeyPath, mockMsgHandler, "abcd1234");
+        var mockRequest = new Mock<OpenAIRequest<MockRequestBody>>(OpenAIEndpoint.Default, new MockRequestBody(), null) { CallBase = true };
+
+        var request = mockRequest.Object;
+
+        var result = request.InvokeAsync(CancellationToken.None).Result;
+        Assert.IsNotNull(result);
+        Assert.AreEqual(result["content"]?["choices"]?.AsArray().Count, 1);
+    }
+}

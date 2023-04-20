@@ -1,53 +1,97 @@
-using System.Text.Json;
 using System.Net;
 using System.Net.Http.Json;
 
 namespace OpenAICmdlet;
 internal static class WebRequest
 {
-    private static readonly int TIMEOUT_MIN = 5;
-    internal static HttpClient HttpClient
-    {
-        get
-        {
-            if (_httpClient?.Value != null)
-                return _httpClient.Value;
-            else
-                return CreateHttpClient();
+    private static ReaderWriterLock _rwLock = new();
+    private static Dictionary<string, HttpClient> _httpClientPool = new();
 
-        }
-        set { HttpClient = value; }
-    }
-    private static Lazy<HttpClient> _httpClient = new(() => CreateHttpClient());
-    private static HttpClient CreateHttpClient()
+    internal static HttpClient? GetHttpClient(string key)
     {
-        var client = new HttpClient() { Timeout = TimeSpan.FromMinutes(TIMEOUT_MIN) };
-        client.DefaultRequestHeaders.Clear();
-        client.DefaultRequestHeaders.Accept.Add(
-            new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/json"));
-        return client;
+        try
+        {
+            _rwLock.AcquireReaderLock(Constant.RW_LOCK_TIMEOUT_MS);
+            try
+            {
+                if (_httpClientPool.ContainsKey(key))
+                {
+                    return _httpClientPool[key];
+                }
+            }
+            finally
+            {
+                _rwLock.ReleaseReaderLock();
+            }
+        }
+        catch (ApplicationException) { }
+        return null;
     }
-    internal static async Task<TReturn?> GetAsync<TReturn>(
-        Uri endpoint, HttpMethod method, CancellationToken cancellationToken = default)
-        where TReturn : new() => await HttpClient.GetFromJsonAsync<TReturn>(endpoint, cancellationToken);
-    internal static async Task<TReturn?> InvokeAsync<TReturn>(
-        Uri endpoint, HttpMethod method, HttpContent? content,
+
+    internal static HttpClient AddHttpClient(string key, HttpMessageHandler? messageHandler = null, string? apiKey = null)
+    {
+        _rwLock.AcquireWriterLock(Constant.RW_LOCK_TIMEOUT_MS);
+        try
+        {
+            var httpClient = CreateHttpClient(messageHandler, apiKey);
+            _httpClientPool[key] = httpClient;
+            return httpClient;
+        }
+        finally
+        {
+            _rwLock.ReleaseWriterLock();
+        }
+    }
+
+    internal static async Task<JsonNode?> GetAsync<JsonDocument>(this HttpClient client,
+        Uri endpoint, CancellationToken cancellationToken = default)
+        => await client.GetFromJsonAsync<JsonNode>(endpoint, cancellationToken);
+    internal static async Task<JsonNode?> InvokeAsync(this HttpClient client,
+        Uri endpoint, HttpMethod method, JsonContent content,
         CancellationToken cancellationToken = default)
-        where TReturn : new()
         => method.Method switch
         {
-            WebRequestMethods.Http.Post => await Task.Run<TReturn?>(() =>
+            WebRequestMethods.Http.Post => await Task.Run<JsonNode?>(() =>
             {
-                var response = HttpClient.PutAsync(endpoint, content, cancellationToken).Result;
+                var response = client.PostAsync(endpoint, content, cancellationToken).Result;
                 response.EnsureSuccessStatusCode();
-                return response.Content.ReadFromJsonAsync<TReturn?>().Result;
+                return response.Content.ReadFromJsonAsync<JsonNode?>().Result;
             }),
-            WebRequestMethods.Http.Put => await Task.Run<TReturn?>(() =>
+            WebRequestMethods.Http.Put => await Task.Run<JsonNode?>(() =>
             {
-                var response = HttpClient.PostAsync(endpoint, content, cancellationToken).Result;
+                var response = client.PutAsync(endpoint, content, cancellationToken).Result;
                 response.EnsureSuccessStatusCode();
-                return response.Content.ReadFromJsonAsync<TReturn?>().Result;
+                return response.Content.ReadFromJsonAsync<JsonNode?>().Result;
             }),
             _ => throw new ArgumentException("Invalid HTTP Method provided!")
         };
+
+    internal class MockHandler : HttpMessageHandler
+    {
+        Func<HttpRequestMessage, HttpResponseMessage> _responseGenerator = _ => new HttpResponseMessage();
+        public MockHandler(Func<HttpRequestMessage, HttpResponseMessage> responseGenerator) => _responseGenerator = responseGenerator;
+        protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            var response = _responseGenerator(request);
+            response.RequestMessage = request;
+            return Task.FromResult(response);
+
+        }
+    }
+
+    private static HttpClient CreateHttpClient(HttpMessageHandler? messageHandler = null, string? apiKey = null)
+    {
+        var client = (messageHandler == null) ?
+            new HttpClient() { Timeout = TimeSpan.FromMinutes(Constant.HTTP_TIMEOUT_MIN) }
+            : new HttpClient(messageHandler) { Timeout = TimeSpan.FromMinutes(Constant.HTTP_TIMEOUT_MIN) };
+
+        client.DefaultRequestHeaders.Clear();
+        if (!string.IsNullOrEmpty(apiKey))
+        {
+            client.DefaultRequestHeaders.Authorization =
+                new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", apiKey);
+        }
+        return client;
+    }
 }

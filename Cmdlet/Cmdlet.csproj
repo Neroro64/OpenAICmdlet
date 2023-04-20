@@ -9,5 +9,6 @@
 
   <ItemGroup>
     <PackageReference Include="System.Management.Automation" Version="7.3.3" />
+    <InternalsVisibleTo Include="Cmdlet.Tests" />
   </ItemGroup>
 </Project>

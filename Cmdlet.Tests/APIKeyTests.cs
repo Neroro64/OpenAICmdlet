@@ -1,6 +1,4 @@
-using OpenAICmdlet;
-using Moq;
-namespace Cmdlet.Tests;
+namespace OpenAICmdlet.Tests;
 
 [TestClass]
 public class APIKeyTests
