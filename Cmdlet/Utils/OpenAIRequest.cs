@@ -2,18 +2,18 @@ using System.Net.Http.Json;
 using System.Net.Http.Headers;
 namespace OpenAICmdlet;
 
-public class OpenAIRequest<TContent> where TContent : new()
+public class OpenAIRequest
 {
     public Uri EndPoint { get; init; }
 
-    public TContent Body { get; init; }
+    public OpenAIRequestBody Body { get; init; }
 
     public string APIKeyPath { get; init; }
 
-    public OpenAIRequest(Uri endPoint, TContent body, string? apiKeyPath)
+    public OpenAIRequest(Uri endPoint, OpenAIRequestBody body, string? apiKeyPath)
     {
-        if (!typeof(TContent).IsSerializable)
-            throw new InvalidOperationException("(TContent) Request content type must be serializable!");
+        if (!typeof(OpenAIRequestBody).IsSerializable)
+            throw new InvalidOperationException("(OpenAIRequestBody) Request content type must be serializable!");
         EndPoint = endPoint;
         Body = body;
         APIKeyPath = apiKeyPath ?? SecureAPIKey.DefaultAPIKeyPath;
@@ -24,7 +24,7 @@ public class OpenAIRequest<TContent> where TContent : new()
         if (cancellationToken.IsCancellationRequested)
             return null;
 
-        JsonContent content = JsonContent.Create<TContent>(
+        JsonContent content = JsonContent.Create<OpenAIRequestBody>(
             Body,
             new MediaTypeWithQualityHeaderValue("application/json"),
             Constant.SerializerOption);

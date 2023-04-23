@@ -16,7 +16,25 @@ public class OpenAIRequestTests
         });
 
         WebRequest.AddHttpClient(SecureAPIKey.DefaultAPIKeyPath, mockMsgHandler, "abcd1234");
-        var mockRequest = new Mock<OpenAIRequest<MockRequestBody>>(OpenAIEndpoint.Default, new MockRequestBody(), null) { CallBase = true };
+        var mockRequest = new Mock<OpenAIRequest>(OpenAIEndpoint.Default, new OpenAIRequestBody()
+        {
+            Prompt = "Hello World",
+            Messages = new()
+            {
+                new()
+                {
+                    ["role"] = "system",
+                    ["content"] = "Helpful Assistant"
+                },
+                new()
+                {
+                    ["role"] = "user",
+                    ["content"] = "Test prompt"
+                },
+            },
+            Stop = new string[] { "a", "\r", "\n" }
+        }, null)
+        { CallBase = true };
 
         var request = mockRequest.Object;
 

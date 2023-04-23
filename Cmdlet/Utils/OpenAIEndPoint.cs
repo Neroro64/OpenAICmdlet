@@ -1,12 +1,6 @@
 namespace OpenAICmdlet;
 internal static class OpenAIEndpoint
 {
-    internal enum OpenAITask
-    {
-        TextCompletion, ChatCompletion,
-        ImageGeneration, ImageEdit, ImageVariation,
-        AudioTranscription, AudioTranslation
-    }
     internal const string Root = "https://api.openai.com/v1";
     internal static string TaskEndpoint(OpenAITask task) => task switch
     {
