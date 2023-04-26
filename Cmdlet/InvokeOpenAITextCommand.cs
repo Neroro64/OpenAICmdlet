@@ -5,7 +5,7 @@ namespace OpenAICmdlet;
 [OutputType(typeof(OpenAIResponse))]
 public class InvokeOpenAITextCommand : MyCmdlet
 {
-    private static List<OpenAIResponse> _history = new();
+    private static List<List<OpenAIResponse>> _history = new();
 
     [Parameter(Mandatory = true, ValueFromPipeline = true, ValueFromPipelineByPropertyName = true,
     HelpMessage = "The prompt(s) to generate completions for, encoded as a string")]
@@ -14,7 +14,7 @@ public class InvokeOpenAITextCommand : MyCmdlet
 
     [Parameter(HelpMessage = "Text completion mode.  Note:'ChatGPT' performs similar to 'TextCompletion' at 10% the price.")]
     [ValidateSet(nameof(OpenAITask.ChatCompletion), nameof(OpenAITask.TextCompletion))]
-    public OpenAITask Mode { get; set; } = OpenAITask.TextCompletion;
+    public OpenAITask Mode { get; set; } = OpenAITask.ChatCompletion;
 
     [Parameter(HelpMessage = "Path to a text file with extra context", ValueFromPipelineByPropertyName = true)]
     public string? ContextFilePath { get; set; }
@@ -50,8 +50,11 @@ public class InvokeOpenAITextCommand : MyCmdlet
     [ValidateCount(0, 4)]
     public string[]? StopSequences { get; set; }
 
-    [Parameter(HelpMessage = "Continue on the last conversation")]
-    public SwitchParameter ContinueLastConversation { get; set; }
+    [Parameter(HelpMessage = "Continue on a previous session")]
+    public SwitchParameter ContinueSession { get; set; }
+
+    [Parameter(HelpMessage = "Species which session to continue")]
+    public int SessionID { get; set; } = -1;
 
     [Parameter(HelpMessage = "Number of images that should be generated")]
     public int Samples { get; set; } = Constant.defaultRequestParam.N;
@@ -77,18 +80,39 @@ public class InvokeOpenAITextCommand : MyCmdlet
     }
     protected override void ProcessRecord()
     {
+        // Build the prompt
+        List<OpenAIResponse>? sessionToContinue = default;
+        if (ContinueSession)
+        {
+            if (SessionID >= _history.Count)
+                WriteError(
+                    new ErrorRecord(
+                        new ArgumentException("Invalid ContinueOnSessionID! It is greater that the number of sessions"),
+                        "Invalid ContinueOnSessionID",
+                        ErrorCategory.InvalidArgument,
+                        this));
+
+            else if (SessionID == -1)
+                sessionToContinue = _history.LastOrDefault(new List<OpenAIResponse>());
+            else
+                sessionToContinue = _history[SessionID];
+        }
+
         switch (Mode)
         {
             case OpenAITask.TextCompletion:
                 _requestBody.Prompt = PromptBuilder.BuildPrompt(Prompt, ContextFilePath);
                 break;
             case OpenAITask.ChatCompletion:
-                _requestBody.Messages = PromptBuilder.BuildChat(ChatInitInstruction, Prompt, ContextFilePath, ContinueLastConversation, _history);
+                _requestBody.Messages = PromptBuilder.BuildChat(
+                    ChatInitInstruction, Prompt, ContextFilePath,
+                    sessionToContinue);
                 break;
             default:
                 throw new ArgumentException($"Failed to build prompt. Invalid OpenAI Task provided: {Mode}");
         }
 
+        // Construct the HTTP request
         var apiRequest = new OpenAIRequest(
             endPoint: OpenAIEndpoint.Get(Mode),
             body: _requestBody,
@@ -112,20 +136,24 @@ public class InvokeOpenAITextCommand : MyCmdlet
 
             var responseContent = taskResponse?["content"];
             if (responseContent == null)
-                WriteError(new(new ArgumentNullException("Response content is null"), "API Request Failure", ErrorCategory.InvalidOperation, _requestBody));
+                WriteError(new(
+                    new ArgumentNullException("Response content is null"),
+                    "API Request Failure",
+                    ErrorCategory.InvalidOperation,
+                    _requestBody));
 
-            WriteVerbose($"Quota usage: {responseContent?["usage"]}");
-            var response = new OpenAIResponse()
+            WriteVerbose($"Quota usage: {responseContent!["usage"]}");
+
+            var response = parseResponseContent(responseContent, Mode);
+            if (ContinueSession && _history.Count > 0)
             {
-                Prompt = this.Prompt,
-                Response = responseContent?["text"]?.ToString() ?? ""
-            };
-            if (ContinueLastConversation && Mode == OpenAITask.ChatCompletion)
-            {
-                _history.Add(response);
+                if (SessionID == -1)
+                    _history[^1].Add(response);
+                else
+                    _history[SessionID].Add(response);
             }
             else
-                _history = new() { response };
+                _history.Add(new() { response });
 
             WriteObject(response);
         }
@@ -150,8 +178,23 @@ Request body : {_requestBody}
 ---
 @";
     }
-}
+    private OpenAIResponse parseResponseContent(JsonNode responseContent, OpenAITask mode)
+    {
+        var query = mode switch
+        {
+            OpenAITask.ChatCompletion =>
+                from choice in responseContent["choices"]?.AsArray()
+                let message = choice["message"]?.AsObject()
+                select message["content"]?.ToString(),
+            OpenAITask.TextCompletion or _ =>
+                from choice in responseContent["choices"]?.AsArray()
+                select choice["text"]?.ToString()
+        };
 
-//string shouldProcessDesc = $@"
-//if (ShouldProcess(shouldProcessDesc; shouldProcessDesc, "Invoke OpenAI API request"))
-//{
+        return new OpenAIResponse()
+        {
+            Prompt = this.Prompt,
+            Response = query.ToArray<string>()
+        };
+    }
+}

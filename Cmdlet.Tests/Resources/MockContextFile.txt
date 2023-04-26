@@ -1,0 +1,28 @@
+This is a file that provides more context the the model followed by an instruction.
+
+Below is an example code snippet:
+```csharp
+public async Task<JsonNode?> InvokeAsync(CancellationToken cancellationToken, HttpMessageHandler? messageHandler = null)
+{
+    if (cancellationToken.IsCancellationRequested)
+        return null;
+
+    JsonContent content = JsonContent.Create<OpenAIRequestBody>(
+        Body,
+        new MediaTypeWithQualityHeaderValue("application/json"),
+        Constant.SerializerOption);
+    try
+    {
+        var httpClient =
+        WebRequest.GetHttpClient(APIKeyPath)
+        ?? WebRequest.AddHttpClient(APIKeyPath, messageHandler, SecureAPIKey.DecryptFromFile(APIKeyPath));
+        return await httpClient.InvokeAsync(EndPoint, HttpMethod.Post, content, cancellationToken);
+    }
+    catch (Exception exp)
+    {
+        throw exp.InnerException ?? new HttpRequestException($"Http Request failed with message: {exp.Message}");
+    }
+}
+```
+
+

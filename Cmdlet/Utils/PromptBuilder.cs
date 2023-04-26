@@ -23,8 +23,7 @@ internal static class PromptBuilder
         string initMessage,
         string prompt,
         string? contextFilePath,
-        bool prependHistory,
-        List<OpenAIResponse> history)
+        List<OpenAIResponse>? history)
     {
         var messages = new List<Dictionary<string, string>>()
         {
@@ -34,12 +33,12 @@ internal static class PromptBuilder
                 ["content"] = initMessage,
             }
         };
-        if (prependHistory)
+        if (history != null)
         {
             foreach (var response in history)
             {
                 messages.Add(new Dictionary<string, string>() { ["role"] = "user", ["content"] = response.Prompt });
-                messages.Add(new Dictionary<string, string>() { ["role"] = "assistant", ["content"] = response.Response });
+                messages.Add(new Dictionary<string, string>() { ["role"] = "assistant", ["content"] = response.Response.First() });
             }
         }
         messages.Add(new Dictionary<string, string>() { ["role"] = "user", ["content"] = prompt });
