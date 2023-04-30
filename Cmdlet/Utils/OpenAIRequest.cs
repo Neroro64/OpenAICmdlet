@@ -1,4 +1,4 @@
-using System.Net.Http.Json;
+﻿using System.Net.Http.Json;
 using System.Net.Http.Headers;
 namespace OpenAICmdlet;
 
@@ -24,7 +24,7 @@ public class OpenAIRequest
         if (cancellationToken.IsCancellationRequested)
             return null;
 
-        JsonContent content = JsonContent.Create<OpenAIRequestBody>(
+        using JsonContent content = JsonContent.Create<OpenAIRequestBody>(
             Body,
             new MediaTypeWithQualityHeaderValue("application/json"),
             Constant.SerializerOption);
@@ -33,7 +33,7 @@ public class OpenAIRequest
             var httpClient =
             WebRequest.GetHttpClient(APIKeyPath)
             ?? WebRequest.AddHttpClient(APIKeyPath, messageHandler, SecureAPIKey.DecryptFromFile(APIKeyPath));
-            return await httpClient.InvokeAsync(EndPoint, HttpMethod.Post, content, cancellationToken);
+            return await httpClient.InvokeAsync(EndPoint, HttpMethod.Post, content, cancellationToken).ConfigureAwait(continueOnCapturedContext:false);
         }
         catch (Exception exp)
         {

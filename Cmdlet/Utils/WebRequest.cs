@@ -14,9 +14,9 @@ internal static class WebRequest
             _rwLock.AcquireReaderLock(Constant.RW_LOCK_TIMEOUT_MS);
             try
             {
-                if (_httpClientPool.ContainsKey(key))
+                if (_httpClientPool.TryGetValue(key, out var client))
                 {
-                    return _httpClientPool[key];
+                    return client;
                 }
             }
             finally
@@ -45,7 +45,7 @@ internal static class WebRequest
 
     internal static async Task<JsonNode?> GetAsync<JsonDocument>(this HttpClient client,
         Uri endpoint, CancellationToken cancellationToken = default)
-        => await client.GetFromJsonAsync<JsonNode>(endpoint, cancellationToken);
+        => await client.GetFromJsonAsync<JsonNode>(endpoint, cancellationToken).ConfigureAwait(continueOnCapturedContext:false);
     internal static async Task<JsonNode?> InvokeAsync(this HttpClient client,
         Uri endpoint, HttpMethod method, JsonContent content,
         CancellationToken cancellationToken = default)
@@ -56,13 +56,13 @@ internal static class WebRequest
                 var response = client.PostAsync(endpoint, content, cancellationToken).Result;
                 response.EnsureSuccessStatusCode();
                 return response.Content.ReadFromJsonAsync<JsonNode?>().Result;
-            }),
+            }).ConfigureAwait(continueOnCapturedContext:false),
             WebRequestMethods.Http.Put => await Task.Run<JsonNode?>(() =>
             {
                 var response = client.PutAsync(endpoint, content, cancellationToken).Result;
                 response.EnsureSuccessStatusCode();
                 return response.Content.ReadFromJsonAsync<JsonNode?>().Result;
-            }),
+            }).ConfigureAwait(continueOnCapturedContext:false),
             _ => throw new ArgumentException("Invalid HTTP Method provided!")
         };
 

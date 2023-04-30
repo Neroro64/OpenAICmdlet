@@ -16,7 +16,7 @@ internal static class SecureAPIKey
         if (!File.Exists(path))
             createParentDirectories(path);
 
-        using (SymmetricAlgorithm aes = Aes.Create())
+        using (Aes aes = Aes.Create())
         {
             (aes.Key, aes.IV) = aesInitPair;
             ICryptoTransform encryptor = aes.CreateEncryptor();
@@ -45,7 +45,7 @@ internal static class SecureAPIKey
         if (!File.Exists(path))
             throw new FileNotFoundException($"API key not found at {path}! \nUse Set-OpenAIkey cmdlet to save your API key.");
 
-        using (SymmetricAlgorithm aes = Aes.Create())
+        using (Aes aes = Aes.Create())
         {
             (aes.Key, aes.IV) = aesInitPair;
             ICryptoTransform decryptor = aes.CreateDecryptor();
@@ -73,7 +73,7 @@ internal static class SecureAPIKey
             System.Reflection.Assembly
             .GetExecutingAssembly()
             .GetName().Version?.ToString()
-            .GetHashCode() ?? Constant.MAGIC_SEED));
+            .GetHashCode(StringComparison.InvariantCultureIgnoreCase) ?? Constant.MAGIC_SEED));
 
     private static (byte[], byte[]) aesInitPair => (_aesKey.Value, _aesIV.Value);
     private static readonly Lazy<byte[]> _aesKey = new(() => generateRandomByteArray());

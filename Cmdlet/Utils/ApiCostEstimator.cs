@@ -16,7 +16,7 @@ internal static class ApiCostEstimator
     {
         if (inputPrompt == null || model == null)
             return 0;
-        return inputPrompt.Split(" ").Count() * tokenizeRatio * _CostTable[model];
+        return inputPrompt.Split(" ").Length * tokenizeRatio * _CostTable[model];
     }
 
     internal static float EstimateImageCost(string? size, string? inputPrompt)

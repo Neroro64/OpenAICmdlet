@@ -1,4 +1,3 @@
-using System.Security.Cryptography;
 namespace OpenAICmdlet;
 
 [Cmdlet(VerbsCommon.Set, "OpenAIKey", SupportsShouldProcess = true,

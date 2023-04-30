@@ -1,4 +1,3 @@
-using System.Security.Cryptography;
 namespace OpenAICmdlet;
 
 [Cmdlet(VerbsCommon.Get, "OpenAIKey")]

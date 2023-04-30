@@ -32,7 +32,7 @@ public class InvokeOpenAITextCommand : MyCmdlet
 
     [Parameter(HelpMessage = "An alternative to sampling with temperature, called nucleus sampling, where the model considers the results of the tokens with top_p probability mass. So 0.1 means only the tokens comprising the top 10% probability mass are considered.")]
     [ValidateRange(0.0, 1.0)]
-    public float Top_P { get; set; } = Constant.defaultRequestParam.Top_p;
+    public float Top_p { get; set; } = Constant.defaultRequestParam.Top_p;
 
     [Parameter(HelpMessage = "Positive values penalize new tokens based on whether they appear in the text so far, increasing the model's likelihood to talk about new topics.")]
     [ValidateRange(-2.0, 2.0)]
@@ -48,7 +48,7 @@ public class InvokeOpenAITextCommand : MyCmdlet
 
     [Parameter(HelpMessage = "Up to 4 sequences where the API will stop generating further tokens. The returned text will not contain the stop sequence.")]
     [ValidateCount(0, 4)]
-    public string[]? StopSequences { get; set; }
+    public IEnumerable<string>? StopSequences { get; set; }
 
     [Parameter(HelpMessage = "Continue on a previous session")]
     public SwitchParameter ContinueSession { get; set; }
@@ -75,7 +75,7 @@ public class InvokeOpenAITextCommand : MyCmdlet
             Stop = StopSequences,
             Suffix = Suffix,
             Temperature = Temperature,
-            Top_p = Top_P,
+            Top_p = Top_p,
         };
     }
     protected override void ProcessRecord()

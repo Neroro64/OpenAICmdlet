@@ -1,4 +1,3 @@
-using OpenAICmdlet;
 namespace OpenAICmdlet.Tests;
 
 [TestClass]
@@ -7,7 +6,7 @@ public class OpenAIRequestTests
     [TestMethod]
     public void CanInvokeRequest()
     {
-        var mockMsgHandler = new WebRequest.MockHandler((request) =>
+        using var mockMsgHandler = new WebRequest.MockHandler((request) =>
         {
             return new HttpResponseMessage(System.Net.HttpStatusCode.OK)
             {
@@ -19,7 +18,7 @@ public class OpenAIRequestTests
         var mockRequest = new Mock<OpenAIRequest>(OpenAIEndpoint.Default, new OpenAIRequestBody()
         {
             Prompt = "Hello World",
-            Messages = new()
+            Messages = new List<Dictionary<string, string>>()
             {
                 new()
                 {

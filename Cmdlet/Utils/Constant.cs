@@ -13,7 +13,7 @@ internal static class Constant
     };
     private class LowerCaseNamingPolicy : JsonNamingPolicy
     {
-        public override string ConvertName(string name) => name.ToLower();
+        public override string ConvertName(string name) => name.ToUpperInvariant();
     }
     internal static readonly OpenAIRequestBody defaultRequestParam = new();
 }
