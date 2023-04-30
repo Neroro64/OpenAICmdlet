@@ -7,5 +7,6 @@
       <CodeAnalysisTreatWarningsAsErrors>true</CodeAnalysisTreatWarningsAsErrors>
       <AnalysisMode>All</AnalysisMode>
       <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
+      <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
     </PropertyGroup>
   </Project>

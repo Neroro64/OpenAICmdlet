@@ -7,6 +7,9 @@ internal static class OpenAIModel
         OpenAITask.ChatCompletion => "gpt-3.5-turbo",
         OpenAITask.AudioTranscription => "whisper-1",
         OpenAITask.AudioTranslation => "whisper-1",
+        OpenAITask.ImageGeneration => String.Empty,
+        OpenAITask.ImageEdit => String.Empty,
+        OpenAITask.ImageVariation => String.Empty,
         _ => throw new ArgumentException("Invalid OpenAITask provided.")
     };
 

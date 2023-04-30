@@ -32,7 +32,7 @@ public class OpenAIRequestTests
                 },
             },
             Stop = new string[] { "a", "\r", "\n" }
-        }, null)
+        }, null, false)
         { CallBase = true };
 
         var request = mockRequest.Object;

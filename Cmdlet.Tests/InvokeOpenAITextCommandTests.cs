@@ -1,32 +1,14 @@
 ﻿using System.Management.Automation;
-using System.Management.Automation.Runspaces;
 using System.Net.Http.Json;
 namespace OpenAICmdlet.Tests;
 
 [TestClass]
 public class InvokeOpenAITextCommandTests
 {
-    PowerShell? ps;
-    [TestInitialize]
-    public void TestInitialize()
-    {
-        var initialSessionState = InitialSessionState.CreateDefault();
-        initialSessionState.Commands.Add(new SessionStateCmdletEntry(
-            "Invoke-OpenAIText", typeof(InvokeOpenAITextCommand), null));
-
-        ps = PowerShell.Create(initialSessionState);
-    }
-
-    [TestCleanup]
-    public void TestCleanup()
-    {
-        ps?.Dispose();
-    }
-
     [TestMethod]
     public void CanBindParametersWhatIf()
     {
-
+        using var ps = PowerShellTestBase.CreatePowerShell("Invoke-OpenAIText", typeof(InvokeOpenAITextCommand));
         using var mockMsgHandler = new WebRequest.MockHandler(
             (request) =>
             {
@@ -63,6 +45,7 @@ public class InvokeOpenAITextCommandTests
     [DynamicData(nameof(ParamSet))]
     public void CanInvokeCommand(Dictionary<string, object> param)
     {
+        using var ps = PowerShellTestBase.CreatePowerShell("Invoke-OpenAIText", typeof(InvokeOpenAITextCommand));
         ArgumentNullException.ThrowIfNull(param);
         (string content, string response) =
             (param.ContainsKey("Mode"))
@@ -98,6 +81,7 @@ public class InvokeOpenAITextCommandTests
     [TestMethod]
     public void CanContinueChat()
     {
+        using var ps = PowerShellTestBase.CreatePowerShell("Invoke-OpenAIText", typeof(InvokeOpenAITextCommand));
         (string content, string response) =
             (MockOpenAIResponseData.ChatResponse, MockOpenAIResponseData.ChatResponseText);
 
@@ -142,6 +126,7 @@ public class InvokeOpenAITextCommandTests
     [TestMethod]
     public void CanContinueMultipleSession()
     {
+        using var ps = PowerShellTestBase.CreatePowerShell("Invoke-OpenAIText", typeof(InvokeOpenAITextCommand));
         (string textContent, string textResponse) = (MockOpenAIResponseData.CompletionResponse,
                                                      MockOpenAIResponseData.CompletionResponseText);
         (string chatContent, string chatResponse) =
@@ -210,6 +195,7 @@ public class InvokeOpenAITextCommandTests
     [TestMethod]
     public void CanInvokeCommandThroughPipeline()
     {
+        using var ps = PowerShellTestBase.CreatePowerShell("Invoke-OpenAIText", typeof(InvokeOpenAITextCommand));
         (string content, string response) = (MockOpenAIResponseData.CompletionResponse,
                                              MockOpenAIResponseData.CompletionResponseText);
 
@@ -237,6 +223,7 @@ public class InvokeOpenAITextCommandTests
     [TestMethod]
     public void CanInvokeCommandThroughPipelineUsingPropertyName()
     {
+        using var ps = PowerShellTestBase.CreatePowerShell("Invoke-OpenAIText", typeof(InvokeOpenAITextCommand));
         (string content, string response) = (MockOpenAIResponseData.CompletionResponse,
                                              MockOpenAIResponseData.CompletionResponseText);
 
@@ -259,6 +246,19 @@ public class InvokeOpenAITextCommandTests
         Assert.IsNotNull(result);
         Assert.IsFalse(ps.HadErrors);
         Assert.AreEqual(result.First().Response.First(), response);
+    }
+
+    [TestMethod]
+    [Ignore]
+    public void CanInvokeCommandForReal()
+    {
+        using var ps = PowerShellTestBase.CreatePowerShell("Invoke-OpenAIText", typeof(InvokeOpenAITextCommand));
+        ps!.AddCommand("Invoke-OpenAIText")
+            .AddParameter("Prompt", "In powershell, I try to import a module but got error \"Assembly with same name is already loaded\". How do I solve this?");
+
+        var result = ps.Invoke<OpenAIResponse>().ToList();
+        Assert.IsNotNull(result);
+        Assert.IsFalse(ps.HadErrors);
     }
 
     public static IEnumerable<object[]> ParamSet

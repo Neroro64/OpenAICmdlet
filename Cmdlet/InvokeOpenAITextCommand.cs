@@ -1,4 +1,4 @@
-namespace OpenAICmdlet;
+﻿namespace OpenAICmdlet;
 
 [Cmdlet(VerbsLifecycle.Invoke, "OpenAIText", SupportsShouldProcess = true)]
 [Alias("gpt")]
@@ -7,10 +7,10 @@ public class InvokeOpenAITextCommand : MyCmdlet
 {
     private static List<List<OpenAIResponse>> _history = new();
 
-    [Parameter(Mandatory = true, ValueFromPipeline = true, ValueFromPipelineByPropertyName = true,
+    [Parameter(Mandatory = true, Position = 0, ValueFromPipeline = true, ValueFromPipelineByPropertyName = true,
     HelpMessage = "The prompt(s) to generate completions for, encoded as a string")]
     [ValidateLength(0, 4096)]
-    public string Prompt { get; set; } = "";
+    public string Prompt { get; set; } = String.Empty;
 
     [Parameter(HelpMessage = "Text completion mode.  Note:'ChatGPT' performs similar to 'TextCompletion' at 10% the price.")]
     [ValidateSet(nameof(OpenAITask.ChatCompletion), nameof(OpenAITask.TextCompletion))]
@@ -127,7 +127,7 @@ public class InvokeOpenAITextCommand : MyCmdlet
             var taskResponse = requestTask.Result;
             if (requestTask.IsFaulted)
             {
-                foreach (var exp in requestTask.Exception.InnerExceptions)
+                foreach (var exp in requestTask!.Exception!.InnerExceptions)
                 {
                     WriteError(new(exp, "API Request Failure", ErrorCategory.InvalidOperation, _requestBody));
                 }
@@ -163,18 +163,18 @@ public class InvokeOpenAITextCommand : MyCmdlet
     {
         float cost = 0;
         if (Mode == OpenAITask.TextCompletion)
-            cost = ApiCostEstimator.EstimateTokenCost(request.Body.Prompt, request.Body.Model);
+            cost = ApiCostEstimator.EstimateTokenCost(request.Body.Prompt, request.Body.Model, request.Body.N);
         else
         {
-            var messagesAsSingleStr = String.Join("\n", request.Body?.Messages?.Select(x => x["content"]).ToList() ?? new());
-            cost = ApiCostEstimator.EstimateTokenCost(messagesAsSingleStr, request.Body?.Model);
+            var messagesAsSingleStr = String.Join("\n", request.Body.Messages?.Select(x => x["content"]).ToList() ?? new());
+            cost = ApiCostEstimator.EstimateTokenCost(messagesAsSingleStr, request.Body.Model, request.Body?.N ?? 1);
         }
         return $@"
 Sending a request to {request.EndPoint}
 with API Key from: {request.APIKeyPath}    
 estimated cost: {cost}
 ---
-Request body : {_requestBody}
+Request body : {JsonSerializer.Serialize(request.Body, options: Constant.SerializerOption)}
 ---
 @";
     }

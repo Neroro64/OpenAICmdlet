@@ -1,4 +1,4 @@
-using System.Net;
+﻿using System.Net;
 using System.Net.Http.Json;
 
 namespace OpenAICmdlet;
@@ -47,7 +47,7 @@ internal static class WebRequest
         Uri endpoint, CancellationToken cancellationToken = default)
         => await client.GetFromJsonAsync<JsonNode>(endpoint, cancellationToken).ConfigureAwait(continueOnCapturedContext:false);
     internal static async Task<JsonNode?> InvokeAsync(this HttpClient client,
-        Uri endpoint, HttpMethod method, JsonContent content,
+        Uri endpoint, HttpMethod method, HttpContent content,
         CancellationToken cancellationToken = default)
         => method.Method switch
         {

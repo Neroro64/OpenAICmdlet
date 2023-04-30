@@ -8,12 +8,12 @@ internal static class Constant
     internal static readonly JsonSerializerOptions SerializerOption = new()
     {
         IgnoreReadOnlyFields = true,
-        DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull | System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault,
+        DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault,
         PropertyNamingPolicy = new LowerCaseNamingPolicy()
     };
     private class LowerCaseNamingPolicy : JsonNamingPolicy
     {
-        public override string ConvertName(string name) => name.ToUpperInvariant();
+        public override string ConvertName(string name) => name.ToLowerInvariant();
     }
     internal static readonly OpenAIRequestBody defaultRequestParam = new();
 }

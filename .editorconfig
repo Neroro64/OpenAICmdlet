@@ -11,6 +11,7 @@ indent_style = space
 ###############################
 dotnet_diagnostic.CA5394.severity = none
 dotnet_diagnostic.CA1707.severity = none
+dotnet_diagnostic.CA1308.severity = none
 
 # XML project files
 [*.{csproj,vbproj,vcxproj,vcxproj.filters,proj,projitems,shproj}]

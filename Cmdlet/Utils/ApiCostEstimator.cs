@@ -1,4 +1,4 @@
-namespace OpenAICmdlet;
+﻿namespace OpenAICmdlet;
 
 internal static class ApiCostEstimator
 {
@@ -12,27 +12,27 @@ internal static class ApiCostEstimator
         ["512x512"] = 0.018f, // per image
         ["1024x1024"] = 0.02f, // per image
     };
-    internal static float EstimateTokenCost(string? inputPrompt, string? model)
+    internal static float EstimateTokenCost(string? inputPrompt, string? model, int samples)
     {
         if (inputPrompt == null || model == null)
             return 0;
-        return inputPrompt.Split(" ").Length * tokenizeRatio * _CostTable[model];
+        return inputPrompt.Split(" ").Length * tokenizeRatio * _CostTable[model] * samples;
     }
 
-    internal static float EstimateImageCost(string? size, string? inputPrompt)
+    internal static float EstimateImageCost(string? size, string? inputPrompt, int samples)
     {
         if (size == null || !_CostTable.ContainsKey(size))
             return 0;
 
         inputPrompt ??= "";
-        return EstimateTokenCost(inputPrompt, "text-davinci-003") + _CostTable[size];
+        return EstimateTokenCost(inputPrompt, "text-davinci-003", 1) + _CostTable[size] * samples;
     }
 
-    internal static float EstimateAudioCost(float? audioMin, string? inputPrompt)
+    internal static float EstimateAudioCost(float? audioMin, string? inputPrompt, int samples)
     {
         if (audioMin == null)
             return 0;
         inputPrompt ??= "";
-        return EstimateTokenCost(inputPrompt, "text-davinci-003") + _CostTable["whisper-1"] * audioMin.Value;
+        return EstimateTokenCost(inputPrompt, "text-davinci-003", 1) + _CostTable["whisper-1"] * audioMin.Value * samples;
     }
 }

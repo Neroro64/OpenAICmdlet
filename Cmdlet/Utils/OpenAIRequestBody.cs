@@ -1,3 +1,4 @@
+﻿using System.Text.Json.Serialization;
 namespace OpenAICmdlet;
 
 [Serializable]
@@ -12,13 +13,14 @@ public sealed class OpenAIRequestBody
     #endregion
 
     #region Image parameters
-    public string? Size { get; set; }
-    public string? Image { get; set; }
-    public string? Mask { get; set; }
+    [JsonIgnore] public string? Size { get; set; }
+    [JsonIgnore] public string? Image { get; set; }
+    [JsonIgnore] public string? Mask { get; set; }
     #endregion
 
     #region Audio parameters
-    public string? File { get; set; }
+    [JsonIgnore] public string? File { get; set; }
+    public string? Language { get; set; }
     #endregion
 
     #region Generation parameters

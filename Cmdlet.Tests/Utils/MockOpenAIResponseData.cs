@@ -1,4 +1,4 @@
-namespace OpenAICmdlet.Tests;
+﻿namespace OpenAICmdlet.Tests;
 public static class MockOpenAIResponseData
 {
     public const string CompletionResponse = @"
@@ -20,6 +20,7 @@ public static class MockOpenAIResponseData
   ""content"": { ""created"": 1589478378, ""data"": [ { ""url"": ""https://..."" }, { ""url"": ""https://..."" } ] }
 }
 ";
+    public const string AudioResponseText = "Hello, my name is Wolfgang and I come from Germany. Where are you heading today?";
     public const string AudioResponse = @"
 {
   ""content"": { ""text"": ""Hello, my name is Wolfgang and I come from Germany. Where are you heading today?"" }
