@@ -6,11 +6,11 @@ internal static class ApiCostEstimator
     private static readonly Dictionary<string, float> _CostTable = new()
     {
         ["text-davinci-003"] = 0.02f / 1000f, // per token
-        ["gpt-3.5-turbo"] = 0.002f / 1000f, // per token
-        ["whisper-1"] = 0.006f, // per minute
-        ["256x256"] = 0.016f, // per image
-        ["512x512"] = 0.018f, // per image
-        ["1024x1024"] = 0.02f, // per image
+        ["gpt-3.5-turbo"] = 0.002f / 1000f,   // per token
+        ["whisper-1"] = 0.006f,               // per minute
+        ["256x256"] = 0.016f,                 // per image
+        ["512x512"] = 0.018f,                 // per image
+        ["1024x1024"] = 0.02f,                // per image
     };
     internal static float EstimateTokenCost(string? inputPrompt, string? model, int samples)
     {
@@ -33,6 +33,7 @@ internal static class ApiCostEstimator
         if (audioMin == null)
             return 0;
         inputPrompt ??= "";
-        return EstimateTokenCost(inputPrompt, "text-davinci-003", 1) + _CostTable["whisper-1"] * audioMin.Value * samples;
+        return EstimateTokenCost(inputPrompt, "text-davinci-003", 1) +
+               _CostTable["whisper-1"] * audioMin.Value * samples;
     }
 }

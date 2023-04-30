@@ -6,7 +6,8 @@ public class InvokeOpenAIImageCommandTests
     [TestMethod]
     public void CanBindParametersWhatIf()
     {
-        using var ps = PowerShellTestBase.CreatePowerShell("Invoke-OpenAIImage", typeof(InvokeOpenAIImageCommand));
+        using var ps = PowerShellTestBase.CreatePowerShell("Invoke-OpenAIImage",
+                                                           typeof(InvokeOpenAIImageCommand));
         using var mockMsgHandler = new WebRequest.MockHandler(
             (request) =>
             {
@@ -37,7 +38,8 @@ public class InvokeOpenAIImageCommandTests
     [DynamicData(nameof(ParamSet))]
     public void CanInvokeCommand(Dictionary<string, object> param)
     {
-        using var ps = PowerShellTestBase.CreatePowerShell("Invoke-OpenAIImage", typeof(InvokeOpenAIImageCommand));
+        using var ps = PowerShellTestBase.CreatePowerShell("Invoke-OpenAIImage",
+                                                           typeof(InvokeOpenAIImageCommand));
         ArgumentNullException.ThrowIfNull(param);
         string content = MockOpenAIResponseData.ImageResponse;
 
@@ -60,7 +62,24 @@ public class InvokeOpenAIImageCommandTests
         Assert.AreEqual(result.Count, 1);
 
         // Verify response content
-        Assert.IsTrue(result.First().Response.First().Contains("https", StringComparison.InvariantCultureIgnoreCase));
+        Assert.IsTrue(result.First().Response.First().Contains(
+            "https", StringComparison.InvariantCultureIgnoreCase));
+    }
+
+    [TestMethod]
+    [Ignore]
+    public void CanInvokeCommandForReal()
+    {
+        using var ps = PowerShellTestBase.CreatePowerShell("Invoke-OpenAIImage",
+                                                           typeof(InvokeOpenAIImageCommand));
+
+        ps!.AddCommand("Invoke-OpenAIImage")
+            .AddParameter("Mode", OpenAITask.ImageVariation)
+            .AddParameter("ImagePath", "../../../../OpenAICmdlet/resources/logo.png");
+
+        var result = ps.Invoke<OpenAIResponse>().ToList();
+        Assert.IsNotNull(result);
+        Assert.AreEqual(result.Count, 1);
     }
 
     public static IEnumerable<object[]> ParamSet

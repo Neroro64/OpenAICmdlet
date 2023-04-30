@@ -1,4 +1,4 @@
-namespace OpenAICmdlet;
+﻿namespace OpenAICmdlet;
 
 public class MyCmdlet : Cmdlet
 {
@@ -11,7 +11,8 @@ public class MyCmdlet : Cmdlet
     {
         return this.ShouldProcess(verboseDescription, verboseDescription, caption);
     }
-    public virtual new bool ShouldProcess(string verboseDescription, string verboseWarning, string caption)
+    public virtual new bool ShouldProcess(string verboseDescription, string verboseWarning,
+                                          string caption)
     {
         return base.ShouldProcess(verboseDescription, verboseWarning, caption);
     }

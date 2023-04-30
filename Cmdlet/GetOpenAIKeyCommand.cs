@@ -1,4 +1,4 @@
-namespace OpenAICmdlet;
+﻿namespace OpenAICmdlet;
 
 [Cmdlet(VerbsCommon.Get, "OpenAIKey")]
 public class GetOpenAIKeyCommand : MyCmdlet

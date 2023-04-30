@@ -1,4 +1,4 @@
-namespace OpenAICmdlet;
+﻿namespace OpenAICmdlet;
 internal static class OpenAIEndpoint
 {
     internal const string Root = "https://api.openai.com/v1";
@@ -6,7 +6,7 @@ internal static class OpenAIEndpoint
     {
         OpenAITask.TextCompletion => "/completions",
         OpenAITask.ChatCompletion => "/chat/completions",
-        OpenAITask.ImageGeneration => "/image/generations",
+        OpenAITask.ImageGeneration => "/images/generations",
         OpenAITask.ImageEdit => "/images/edits",
         OpenAITask.ImageVariation => "/images/variations",
         OpenAITask.AudioTranscription => "/audio/transcriptions",

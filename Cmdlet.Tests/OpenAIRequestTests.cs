@@ -1,4 +1,4 @@
-namespace OpenAICmdlet.Tests;
+﻿namespace OpenAICmdlet.Tests;
 
 [TestClass]
 public class OpenAIRequestTests
@@ -6,39 +6,35 @@ public class OpenAIRequestTests
     [TestMethod]
     public void CanInvokeRequest()
     {
-        using var mockMsgHandler = new WebRequest.MockHandler((request) =>
-        {
-            return new HttpResponseMessage(System.Net.HttpStatusCode.OK)
+        using var mockMsgHandler = new WebRequest.MockHandler(
+            (request) =>
             {
-                Content = new StringContent(MockOpenAIResponseData.CompletionResponse),
-            };
-        });
+                return new HttpResponseMessage(System.Net.HttpStatusCode.OK)
+                {
+                    Content = new StringContent(MockOpenAIResponseData.CompletionResponse),
+                };
+            });
 
         WebRequest.AddHttpClient(SecureAPIKey.DefaultAPIKeyPath, mockMsgHandler, "abcd1234");
-        var mockRequest = new Mock<OpenAIRequest>(OpenAIEndpoint.Default, new OpenAIRequestBody()
-        {
-            Prompt = "Hello World",
-            Messages = new List<Dictionary<string, string>>()
+        var mockRequest = new Mock<OpenAIRequest>(
+            OpenAIEndpoint.Default,
+            new OpenAIRequestBody()
             {
-                new()
-                {
-                    ["role"] = "system",
-                    ["content"] = "Helpful Assistant"
-                },
-                new()
-                {
-                    ["role"] = "user",
-                    ["content"] = "Test prompt"
-                },
+                Prompt = "Hello World",
+                Messages =
+                    new List<Dictionary<string, string>>() {
+                        new() { ["role"] = "system", ["content"] = "Helpful Assistant" },
+                        new() { ["role"] = "user", ["content"] = "Test prompt" },
+                    },
+                Stop = new string[] { "a", "\r", "\n" }
             },
-            Stop = new string[] { "a", "\r", "\n" }
-        }, null, false)
+            null, false)
         { CallBase = true };
 
         var request = mockRequest.Object;
 
         var result = request.InvokeAsync(CancellationToken.None).Result;
         Assert.IsNotNull(result);
-        Assert.AreEqual(result["content"]?["choices"]?.AsArray().Count, 1);
+        Assert.AreEqual(result["choices"]?.AsArray().Count, 1);
     }
 }

@@ -6,7 +6,8 @@ public class InvokeOpenAIAudioCommandTests
     [TestMethod]
     public void CanBindParametersWhatIf()
     {
-        using var ps = PowerShellTestBase.CreatePowerShell("Invoke-OpenAIAudio", typeof(InvokeOpenAIAudioCommand));
+        using var ps = PowerShellTestBase.CreatePowerShell("Invoke-OpenAIAudio",
+                                                           typeof(InvokeOpenAIAudioCommand));
         using var mockMsgHandler = new WebRequest.MockHandler(
             (request) =>
             {
@@ -34,9 +35,11 @@ public class InvokeOpenAIAudioCommandTests
     [DynamicData(nameof(ParamSet))]
     public void CanInvokeCommand(Dictionary<string, object> param)
     {
-        using var ps = PowerShellTestBase.CreatePowerShell("Invoke-OpenAIAudio", typeof(InvokeOpenAIAudioCommand));
+        using var ps = PowerShellTestBase.CreatePowerShell("Invoke-OpenAIAudio",
+                                                           typeof(InvokeOpenAIAudioCommand));
         ArgumentNullException.ThrowIfNull(param);
-        (string content, string response) = (MockOpenAIResponseData.AudioResponse, MockOpenAIResponseData.AudioResponseText);
+        (string content, string response) =
+            (MockOpenAIResponseData.AudioResponse, MockOpenAIResponseData.AudioResponseText);
 
         using var mockMsgHandler = new WebRequest.MockHandler(
             (request) =>
@@ -60,25 +63,40 @@ public class InvokeOpenAIAudioCommandTests
         Assert.AreEqual(result.First().Response.First(), response);
     }
 
+    [TestMethod]
+    [Ignore]
+    public void CanInvokeCommandForReal()
+    {
+        using var ps = PowerShellTestBase.CreatePowerShell("Invoke-OpenAIAudio",
+                                                           typeof(InvokeOpenAIAudioCommand));
+
+        ps!.AddCommand("Invoke-OpenAIAudio")
+            .AddParameter("AudioPath", "../../../../resources/f7879738_nohash_0.wav");
+
+        var result = ps.Invoke<OpenAIResponse>().ToList();
+        Assert.IsNotNull(result);
+        Assert.AreEqual(result.Count, 1);
+    }
     public static IEnumerable<object[]> ParamSet
     {
         get
         {
             return new[] {
-                new object[] { new Dictionary<string, object>() { ["AudioPath"] = "../../../../resources/f7879738_nohash_0.wav" } },
+                new object[] { new Dictionary<
+                    string, object>() { ["AudioPath"] =
+                                            "../../../../resources/f7879738_nohash_0.wav" } },
                 new object[] { new Dictionary<string, object>() {
                     ["Prompt"] = "Hello World",
                     ["AudioLanguage"] = "en",
                     ["Mode"] = OpenAITask.AudioTranscription,
                     ["AudioPath"] = "../../../../resources/f7879738_nohash_0.wav",
                 } },
-                new object[] { new Dictionary<string, object>() {
-                    ["Prompt"] = "Hello World",
-                    ["AudioLanguage"] = "en",
-                    ["Mode"] = OpenAITask.AudioTranslation,
-                    ["AudioPath"] = "../../../../resources/f7879738_nohash_0.wav",
-                    ["Temperature"] = 2f
-                } }
+                new object[] { new Dictionary<
+                    string, object>() { ["Prompt"] = "Hello World", ["AudioLanguage"] = "en",
+                                        ["Mode"] = OpenAITask.AudioTranslation,
+                                        ["AudioPath"] =
+                                            "../../../../resources/f7879738_nohash_0.wav",
+                                        ["Temperature"] = 2f } }
             };
         }
     }

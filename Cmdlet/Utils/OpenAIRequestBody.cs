@@ -13,13 +13,17 @@ public sealed class OpenAIRequestBody
     #endregion
 
     #region Image parameters
-    [JsonIgnore] public string? Size { get; set; }
-    [JsonIgnore] public string? Image { get; set; }
-    [JsonIgnore] public string? Mask { get; set; }
+    [JsonIgnore]
+    public string? Size { get; set; }
+    [JsonIgnore]
+    public string? Image { get; set; }
+    [JsonIgnore]
+    public string? Mask { get; set; }
     #endregion
 
     #region Audio parameters
-    [JsonIgnore] public string? File { get; set; }
+    [JsonIgnore]
+    public string? File { get; set; }
     public string? Language { get; set; }
     #endregion
 

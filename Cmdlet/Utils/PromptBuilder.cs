@@ -1,4 +1,4 @@
-using System.Text;
+﻿using System.Text;
 namespace OpenAICmdlet;
 
 internal static class PromptBuilder
@@ -8,9 +8,9 @@ internal static class PromptBuilder
         StringBuilder promptBuilder = new();
         if (contextFilePath != null && File.Exists(contextFilePath))
         {
-            // TODO: Add a layer of cleaning, normalizing and summarizing if needed 
-            using (FileStream fs = File.OpenRead(contextFilePath))
-            using (StreamReader reader = new(fs))
+            // TODO: Add a layer of cleaning, normalizing and summarizing if needed
+            using (FileStream fs = File.OpenRead(contextFilePath)) using (StreamReader reader =
+                                                                              new(fs))
             {
                 promptBuilder.Append(reader.ReadToEnd());
             }
@@ -19,26 +19,29 @@ internal static class PromptBuilder
         return promptBuilder.ToString();
     }
 
-    internal static List<Dictionary<string, string>> BuildChat(
-        string initMessage,
-        string prompt,
-        string? contextFilePath,
-        List<OpenAIResponse>? history)
+    internal static List<Dictionary<string, string>> BuildChat(string initMessage, string prompt,
+                                                               string? contextFilePath,
+                                                               List<OpenAIResponse>? history)
     {
-        var messages = new List<Dictionary<string, string>>()
-        {
-            new()
-            {
-                ["role"] = "system",
-                ["content"] = initMessage,
-            }
-        };
+        var messages = new List<Dictionary<string, string>>() { new() {
+            ["role"] = "system",
+            ["content"] = initMessage,
+        } };
         if (history != null)
         {
             foreach (var response in history)
             {
-                messages.Add(new Dictionary<string, string>() { ["role"] = "user", ["content"] = response.Prompt });
-                messages.Add(new Dictionary<string, string>() { ["role"] = "assistant", ["content"] = response.Response.First() });
+                messages.Add(new Dictionary<string, string>()
+                {
+                    ["role"] = "user",
+                    ["content"] = response.Prompt
+                });
+                messages.Add(
+                    new Dictionary<string, string>()
+                    {
+                        ["role"] = "assistant",
+                        ["content"] = response.Response.First()
+                    });
             }
         }
         messages.Add(new Dictionary<string, string>() { ["role"] = "user", ["content"] = prompt });
