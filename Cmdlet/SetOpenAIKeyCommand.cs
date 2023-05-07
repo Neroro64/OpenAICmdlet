@@ -4,7 +4,7 @@
         ConfirmImpact = ConfirmImpact.High)]
 public class SetOpenAIKeyCommand : MyCmdlet
 {
-    [Parameter()]
+    [Parameter(HelpMessage = "The file path where to store the API key")]
     public string Path { get; init; } = SecureAPIKey.DefaultAPIKeyPath;
 
     protected override void EndProcessing()

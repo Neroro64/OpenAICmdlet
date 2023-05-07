@@ -1,5 +1,6 @@
 *.key
 **/obj/*
+[Aa]rtifacts/*
 **/bin/*
 [Ii]gnored/*
 .*/*

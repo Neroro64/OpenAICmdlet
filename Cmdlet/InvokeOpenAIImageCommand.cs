@@ -1,11 +1,11 @@
 ﻿namespace OpenAICmdlet;
 
 [Cmdlet(VerbsLifecycle.Invoke, "OpenAIImage", SupportsShouldProcess = true)]
-[Alias("dalle")]
+[Alias("idalle")]
 [OutputType(typeof(OpenAIResponse))]
 public class InvokeOpenAIImageCommand : MyCmdlet
 {
-    private static List<List<OpenAIResponse>> _history = new();
+    internal static List<List<OpenAIResponse>> History = new();
 
     [Parameter(Position = 0, ValueFromPipeline = true, ValueFromPipelineByPropertyName = true,
                HelpMessage = "The prompt(s) to generate images or guide image edits")]
@@ -128,7 +128,7 @@ public class InvokeOpenAIImageCommand : MyCmdlet
             WriteVerbose($"Quota usage: {responseContent!["usage"]}");
 
             var response = parseResponseContent(responseContent);
-            _history.Add(new() { response });
+            History.Add(new() { response });
 
             WriteObject(response);
         }

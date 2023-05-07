@@ -13,7 +13,7 @@ internal static class SecureAPIKey
     internal static void EncryptToFile(string path, string apiKey)
     {
         if (!File.Exists(path))
-            createParentDirectories(path);
+            path.CreateParentDirectories();
 
         using (Aes aes = Aes.Create())
         {
@@ -88,15 +88,5 @@ internal static class SecureAPIKey
         var buffer = new byte[16];
         _randomGenerator.Value.NextBytes(buffer);
         return buffer;
-    }
-
-    private static void createParentDirectories(string path)
-    {
-        var parentDir = Directory.GetParent(path);
-        if (parentDir != null && !parentDir.Exists)
-        {
-            createParentDirectories(parentDir.FullName);
-            Directory.CreateDirectory(parentDir.FullName);
-        }
     }
 }

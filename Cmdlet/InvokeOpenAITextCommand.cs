@@ -1,11 +1,11 @@
 ﻿namespace OpenAICmdlet;
 
 [Cmdlet(VerbsLifecycle.Invoke, "OpenAIText", SupportsShouldProcess = true)]
-[Alias("gpt")]
+[Alias("igpt")]
 [OutputType(typeof(OpenAIResponse))]
 public class InvokeOpenAITextCommand : MyCmdlet
 {
-    private static List<List<OpenAIResponse>> _history = new();
+    internal static List<List<OpenAIResponse>> History { get; } = new();
 
     [Parameter(Mandatory = true, Position = 0, ValueFromPipeline = true,
                ValueFromPipelineByPropertyName = true,
@@ -140,16 +140,16 @@ public class InvokeOpenAITextCommand : MyCmdlet
         List<OpenAIResponse>? sessionToContinue = default;
         if (ContinueSession)
         {
-            if (SessionID >= _history.Count)
+            if (SessionID >= History.Count)
                 WriteError(new ErrorRecord(
                     new ArgumentException(
                         "Invalid ContinueOnSessionID! It is greater that the number of sessions"),
                     "Invalid ContinueOnSessionID", ErrorCategory.InvalidArgument, this));
 
             else if (SessionID == -1)
-                sessionToContinue = _history.LastOrDefault(new List<OpenAIResponse>());
+                sessionToContinue = History.LastOrDefault(new List<OpenAIResponse>());
             else
-                sessionToContinue = _history[SessionID];
+                sessionToContinue = History[SessionID];
         }
 
         switch (Mode)
@@ -202,15 +202,15 @@ public class InvokeOpenAITextCommand : MyCmdlet
             WriteVerbose($"Quota usage: {responseContent!["usage"]}");
 
             var response = parseResponseContent(responseContent, Mode);
-            if (ContinueSession && _history.Count > 0)
+            if (ContinueSession && History.Count > 0)
             {
                 if (SessionID == -1)
-                    _history[^1].Add(response);
+                    History[^1].Add(response);
                 else
-                    _history[SessionID].Add(response);
+                    History[SessionID].Add(response);
             }
             else
-                _history.Add(new() { response });
+                History.Add(new() { response });
 
             WriteObject(response);
         }

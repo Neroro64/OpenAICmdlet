@@ -9,3 +9,8 @@ public enum OpenAITask
     AudioTranscription,
     AudioTranslation
 }
+
+public enum OpenAICategory
+{
+    Text, Image, Audio, All
+}
