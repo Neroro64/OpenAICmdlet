@@ -8,7 +8,7 @@ public class InvokeOpenAIAudioCommandTests
     {
         using var ps = PowerShellTestBase.CreatePowerShell("Invoke-OpenAIAudio",
                                                            typeof(InvokeOpenAIAudioCommand));
-        using var mockMsgHandler = new WebRequest.MockHandler(
+        using var mockMsgHandler = new MockHandler(
             (request) =>
             {
                 return new HttpResponseMessage(System.Net.HttpStatusCode.OK)
@@ -41,7 +41,7 @@ public class InvokeOpenAIAudioCommandTests
         (string content, string response) =
             (MockOpenAIResponseData.AudioResponse, MockOpenAIResponseData.AudioResponseText);
 
-        using var mockMsgHandler = new WebRequest.MockHandler(
+        using var mockMsgHandler = new MockHandler(
             (request) =>
             {
                 return new HttpResponseMessage(
@@ -55,12 +55,12 @@ public class InvokeOpenAIAudioCommandTests
         foreach (var kv in param)
             ps.AddParameter(kv.Key, kv.Value);
 
-        var result = ps.Invoke<OpenAIResponse>().ToList();
+        var result = ps.Invoke<Response>().ToList();
         Assert.IsNotNull(result);
         Assert.AreEqual(result.Count, 1);
 
         // Verify response content
-        Assert.AreEqual(result.First().Response.First(), response);
+        Assert.AreEqual(result.First().Body.First(), response);
     }
 
     [TestMethod]
@@ -73,7 +73,7 @@ public class InvokeOpenAIAudioCommandTests
         ps!.AddCommand("Invoke-OpenAIAudio")
             .AddParameter("AudioPath", "../../../../resources/f7879738_nohash_0.wav");
 
-        var result = ps.Invoke<OpenAIResponse>().ToList();
+        var result = ps.Invoke<Response>().ToList();
         Assert.IsNotNull(result);
         Assert.AreEqual(result.Count, 1);
     }

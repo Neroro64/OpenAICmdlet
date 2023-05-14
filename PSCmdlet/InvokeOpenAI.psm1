@@ -144,7 +144,7 @@ Form :  $($Form | ConvertTo-Json)
             return $response
         }
         catch {
-            $StatusCode = $_.Exception.Response.StatusCode
+            $StatusCode = $_.Exception.Body.StatusCode
             $ErrorMsg = $_.ErrorDetails.Message
             Write-Error "Request failed with code: $StatusCode `n$($ErrorMsg)"
             return

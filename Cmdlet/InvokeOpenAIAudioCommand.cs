@@ -2,11 +2,9 @@
 
 [Cmdlet(VerbsLifecycle.Invoke, "OpenAIAudio", SupportsShouldProcess = true)]
 [Alias("iwhisper")]
-[OutputType(typeof(OpenAIResponse))]
-public class InvokeOpenAIAudioCommand : MyCmdlet
+[OutputType(typeof(Response))]
+public class InvokeOpenAIAudioCommand : MyOpenAICmdlet
 {
-    internal static List<List<OpenAIResponse>> History = new();
-
     [Parameter(Mandatory = true, Position = 0, ValueFromPipeline = true,
                ValueFromPipelineByPropertyName = true,
                HelpMessage = "Path to the input audio file")]
@@ -51,12 +49,12 @@ public class InvokeOpenAIAudioCommand : MyCmdlet
         get; set;
     }
 
-    private OpenAIRequestBody _requestBody = new();
+    private RequestBody _requestBody = new();
     protected override void BeginProcessing()
     {
         _requestBody = new()
         {
-            Model = OpenAIModel.TaskModel(Mode),
+            Model = Model.TaskModel(Mode),
             Temperature = Temperature,
             Language = AudioLanguage,
             Top_p = 0,
@@ -71,7 +69,7 @@ public class InvokeOpenAIAudioCommand : MyCmdlet
         _requestBody.Prompt = Prompt;
 
         // Construct the HTTP request
-        var apiRequest = new OpenAIRequest(endPoint: OpenAIEndpoint.Get(Mode), body: _requestBody,
+        var apiRequest = new Request(endPoint: Endpoint.Get(Mode), body: _requestBody,
                                            apiKeyPath: APIKeyPath, uploadFile: true);
 
         if (ShouldProcess(generateShouldProcessMsg(apiRequest),
@@ -105,7 +103,7 @@ public class InvokeOpenAIAudioCommand : MyCmdlet
         }
     }
 
-    private static string generateShouldProcessMsg(OpenAIRequest request)
+    private static string generateShouldProcessMsg(Request request)
     {
         // TODO: Get audio length from FileInfo
         float cost = ApiCostEstimator.EstimateAudioCost(1, request.Body.Prompt, 1);
@@ -119,12 +117,12 @@ Request body : {JsonSerializer.Serialize(request.Body, Constant.SerializerOption
 ";
     }
 
-    private OpenAIResponse parseResponseContent(JsonNode responseContent)
+    private Response parseResponseContent(JsonNode responseContent)
     {
-        return new OpenAIResponse()
+        return new Response()
         {
             Prompt = this.Prompt,
-            Response = new string[1] {
+            Body = new string[1] {
                                          responseContent["text"]?.ToString() ?? String.Empty
                                      }
         };

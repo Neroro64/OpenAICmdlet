@@ -2,11 +2,9 @@
 
 [Cmdlet(VerbsLifecycle.Invoke, "OpenAIText", SupportsShouldProcess = true)]
 [Alias("igpt")]
-[OutputType(typeof(OpenAIResponse))]
-public class InvokeOpenAITextCommand : MyCmdlet
+[OutputType(typeof(Response))]
+public class InvokeOpenAITextCommand : MyOpenAICmdlet
 {
-    internal static List<List<OpenAIResponse>> History { get; } = new();
-
     [Parameter(Mandatory = true, Position = 0, ValueFromPipeline = true,
                ValueFromPipelineByPropertyName = true,
                HelpMessage = "The prompt(s) to generate completions for, encoded as a string")]
@@ -118,14 +116,14 @@ public class InvokeOpenAITextCommand : MyCmdlet
         get; set;
     }
 
-    private OpenAIRequestBody _requestBody = new();
+    private RequestBody _requestBody = new();
     protected override void BeginProcessing()
     {
         _requestBody = new()
         {
             Frequency_penalty = FrequencyPenalty,
             Max_Tokens = MaxTokens,
-            Model = OpenAIModel.TaskModel(Mode),
+            Model = Model.TaskModel(Mode),
             N = Samples,
             Precence_penalty = PrecencePenalty,
             Stop = StopSequences,
@@ -137,7 +135,7 @@ public class InvokeOpenAITextCommand : MyCmdlet
     protected override void ProcessRecord()
     {
         // Build the prompt
-        List<OpenAIResponse>? sessionToContinue = default;
+        List<Response>? sessionToContinue = default;
         if (ContinueSession)
         {
             if (SessionID >= History.Count)
@@ -147,7 +145,7 @@ public class InvokeOpenAITextCommand : MyCmdlet
                     "Invalid ContinueOnSessionID", ErrorCategory.InvalidArgument, this));
 
             else if (SessionID == -1)
-                sessionToContinue = History.LastOrDefault(new List<OpenAIResponse>());
+                sessionToContinue = History.LastOrDefault(new List<Response>());
             else
                 sessionToContinue = History[SessionID];
         }
@@ -167,7 +165,7 @@ public class InvokeOpenAITextCommand : MyCmdlet
         }
 
         // Construct the HTTP request
-        var apiRequest = new OpenAIRequest(endPoint: OpenAIEndpoint.Get(Mode), body: _requestBody,
+        var apiRequest = new Request(endPoint: Endpoint.Get(Mode), body: _requestBody,
                                            apiKeyPath: APIKeyPath);
 
         if (ShouldProcess(generateShouldProcessMsg(apiRequest),
@@ -216,7 +214,7 @@ public class InvokeOpenAITextCommand : MyCmdlet
         }
     }
 
-    private string generateShouldProcessMsg(OpenAIRequest request)
+    private string generateShouldProcessMsg(Request request)
     {
         float cost = 0;
         if (Mode == OpenAITask.TextCompletion)
@@ -238,7 +236,7 @@ Request body : {JsonSerializer.Serialize(request.Body, options: Constant.Seriali
 ---
 ";
     }
-    private OpenAIResponse parseResponseContent(JsonNode responseContent, OpenAITask mode)
+    private Response parseResponseContent(JsonNode responseContent, OpenAITask mode)
     {
         var query = mode switch
         {
@@ -254,6 +252,6 @@ Request body : {JsonSerializer.Serialize(request.Body, options: Constant.Seriali
                          ?.ToString()
         };
 
-        return new OpenAIResponse() { Prompt = this.Prompt, Response = query.ToArray<string>() };
+        return new Response() { Prompt = this.Prompt, Body = query.ToArray<string>() };
     }
 }

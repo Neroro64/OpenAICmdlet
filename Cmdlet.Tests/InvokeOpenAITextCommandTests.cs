@@ -10,7 +10,7 @@ public class InvokeOpenAITextCommandTests
     {
         using var ps = PowerShellTestBase.CreatePowerShell("Invoke-OpenAIText",
                                                            typeof(InvokeOpenAITextCommand));
-        using var mockMsgHandler = new WebRequest.MockHandler(
+        using var mockMsgHandler = new MockHandler(
             (request) =>
             {
                 return new HttpResponseMessage(System.Net.HttpStatusCode.OK)
@@ -58,7 +58,7 @@ public class InvokeOpenAITextCommandTests
                           MockOpenAIResponseData.ChatResponseText))
                 : (MockOpenAIResponseData.ChatResponse, MockOpenAIResponseData.ChatResponseText);
 
-        using var mockMsgHandler = new WebRequest.MockHandler(
+        using var mockMsgHandler = new MockHandler(
             (request) =>
             {
                 return new HttpResponseMessage(
@@ -72,12 +72,12 @@ public class InvokeOpenAITextCommandTests
         foreach (var kv in param)
             ps.AddParameter(kv.Key, kv.Value);
 
-        var result = ps.Invoke<OpenAIResponse>().ToList();
+        var result = ps.Invoke<Response>().ToList();
         Assert.IsNotNull(result);
         Assert.AreEqual(result.Count, 1);
 
         // Verify response content
-        Assert.AreEqual(result.First().Response.First(), response);
+        Assert.AreEqual(result.First().Body.First(), response);
     }
 
     [TestMethod]
@@ -90,10 +90,10 @@ public class InvokeOpenAITextCommandTests
 
         int conversationLength = 0;
         bool firstSession = true;
-        using var mockMsgHandler = new WebRequest.MockHandler(
+        using var mockMsgHandler = new MockHandler(
             (request) =>
             {
-                var messageCount = ((OpenAIRequestBody?)(request.Content as JsonContent)?.Value)
+                var messageCount = ((RequestBody?)(request.Content as JsonContent)?.Value)
                                        ?.Messages?.Count();
                 if (firstSession)
                 {
@@ -118,11 +118,11 @@ public class InvokeOpenAITextCommandTests
             .AddParameter("ChatInitInstruction", "This is a test")
             .AddParameter("ContinueSession", true);
 
-        var result1 = ps.Invoke<OpenAIResponse>().ToList();
+        var result1 = ps.Invoke<Response>().ToList();
         Assert.IsNotNull(result1);
         Assert.IsFalse(ps.HadErrors);
 
-        var result2 = ps.Invoke<OpenAIResponse>().ToList();
+        var result2 = ps.Invoke<Response>().ToList();
         Assert.IsNotNull(result2);
         Assert.IsFalse(ps.HadErrors);
     }
@@ -139,11 +139,11 @@ public class InvokeOpenAITextCommandTests
 
         bool checkForLength = false;
         bool useChat = false;
-        using var mockMsgHandler = new WebRequest.MockHandler(
+        using var mockMsgHandler = new MockHandler(
             (request) =>
             {
                 if (checkForLength)
-                    Assert.IsTrue(((OpenAIRequestBody?)(request.Content as JsonContent)?.Value)
+                    Assert.IsTrue(((RequestBody?)(request.Content as JsonContent)?.Value)
                                       ?.Messages?.Count() == 4);
 
                 if (useChat)
@@ -164,10 +164,10 @@ public class InvokeOpenAITextCommandTests
             .AddParameter("Mode", OpenAITask.TextCompletion)
             .AddParameter("ContextFilePath", "../../../Resources/MockContextFile.txt");
 
-        var result1 = ps.Invoke<OpenAIResponse>().ToList();
+        var result1 = ps.Invoke<Response>().ToList();
         Assert.IsNotNull(result1);
         Assert.IsFalse(ps.HadErrors);
-        Assert.AreEqual(result1.First().Response.First(), textResponse);
+        Assert.AreEqual(result1.First().Body.First(), textResponse);
         ps.Commands = new PSCommand();
 
         // Second session
@@ -177,10 +177,10 @@ public class InvokeOpenAITextCommandTests
             .AddParameter("Mode", OpenAITask.ChatCompletion)
             .AddParameter("ContextFilePath", "../../../Resources/MockContextFile.txt");
 
-        var result2 = ps.Invoke<OpenAIResponse>().ToList();
+        var result2 = ps.Invoke<Response>().ToList();
         Assert.IsNotNull(result2);
         Assert.IsFalse(ps.HadErrors);
-        Assert.AreEqual(result2.First().Response.First(), chatResponse);
+        Assert.AreEqual(result2.First().Body.First(), chatResponse);
         ps.Commands = new PSCommand();
 
         // Continue first session
@@ -191,10 +191,10 @@ public class InvokeOpenAITextCommandTests
             .AddParameter("SessionID", 0)
             .AddParameter("ContinueSession", true);
 
-        var result3 = ps.Invoke<OpenAIResponse>().ToList();
+        var result3 = ps.Invoke<Response>().ToList();
         Assert.IsNotNull(result3);
         Assert.IsFalse(ps.HadErrors);
-        Assert.AreEqual(result3.First().Response.First(), chatResponse);
+        Assert.AreEqual(result3.First().Body.First(), chatResponse);
     }
 
     [TestMethod]
@@ -205,7 +205,7 @@ public class InvokeOpenAITextCommandTests
         (string content, string response) = (MockOpenAIResponseData.CompletionResponse,
                                              MockOpenAIResponseData.CompletionResponseText);
 
-        using var mockMsgHandler = new WebRequest.MockHandler(
+        using var mockMsgHandler = new MockHandler(
             (request) =>
             {
                 return new HttpResponseMessage(
@@ -220,10 +220,10 @@ public class InvokeOpenAITextCommandTests
             .AddParameter("Mode", OpenAITask.TextCompletion)
             .AddParameter("ContextFilePath", "../../../Resources/MockContextFile.txt");
 
-        var result = ps.Invoke<OpenAIResponse>().ToList();
+        var result = ps.Invoke<Response>().ToList();
         Assert.IsNotNull(result);
         Assert.IsFalse(ps.HadErrors);
-        Assert.AreEqual(result.First().Response.First(), response);
+        Assert.AreEqual(result.First().Body.First(), response);
     }
 
     [TestMethod]
@@ -234,7 +234,7 @@ public class InvokeOpenAITextCommandTests
         (string content, string response) = (MockOpenAIResponseData.CompletionResponse,
                                              MockOpenAIResponseData.CompletionResponseText);
 
-        using var mockMsgHandler = new WebRequest.MockHandler(
+        using var mockMsgHandler = new MockHandler(
             (request) =>
             {
                 return new HttpResponseMessage(
@@ -249,10 +249,10 @@ public class InvokeOpenAITextCommandTests
             .AddCommand("Invoke-OpenAIText")
             .AddParameter("Mode", OpenAITask.TextCompletion);
 
-        var result = ps.Invoke<OpenAIResponse>().ToList();
+        var result = ps.Invoke<Response>().ToList();
         Assert.IsNotNull(result);
         Assert.IsFalse(ps.HadErrors);
-        Assert.AreEqual(result.First().Response.First(), response);
+        Assert.AreEqual(result.First().Body.First(), response);
     }
 
     [TestMethod]
@@ -263,7 +263,7 @@ public class InvokeOpenAITextCommandTests
                                                            typeof(InvokeOpenAITextCommand));
         ps!.AddCommand("Invoke-OpenAIText").AddParameter("Prompt", "This is a test");
 
-        var result = ps.Invoke<OpenAIResponse>().ToList();
+        var result = ps.Invoke<Response>().ToList();
         Assert.IsNotNull(result);
         Assert.IsFalse(ps.HadErrors);
     }

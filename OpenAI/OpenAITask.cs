@@ -1,8 +1,9 @@
-﻿namespace OpenAICmdlet;
+﻿namespace OpenAI;
 public enum OpenAITask
 {
     TextCompletion,
     ChatCompletion,
+    Embeddings,
     ImageGeneration,
     ImageEdit,
     ImageVariation,
@@ -10,7 +11,12 @@ public enum OpenAITask
     AudioTranslation
 }
 
-public enum OpenAICategory
+[Flags]
+public enum TaskCategory
 {
-    Text, Image, Audio, All
+    None = 0b000,
+    Text = 0b001,
+    Image = 0b010,
+    Audio = 0b100,
+    All = 0b111
 }

@@ -18,7 +18,7 @@ public class OpenAIHistoryTests
 
     [TestMethod]
     [DynamicData(nameof(ParamSet))]
-    public void CanGetAndSetHistory(Dictionary<string, object> param)
+    public void Can_Get_Set_Restore_History(Dictionary<string, object> param)
     {
         // Dry-run of Invoke-OpenAIText
         using var ps = PowerShellTestBase.CreatePowerShell(new[] { "Invoke-OpenAIText", "Get-OpenAIResponseHistory", "Backup-OpenAIResponseHistory" },
@@ -33,7 +33,7 @@ public class OpenAIHistoryTests
                           MockOpenAIResponseData.ChatResponseText))
                 : (MockOpenAIResponseData.ChatResponse, MockOpenAIResponseData.ChatResponseText);
 
-        using var mockMsgHandler = new WebRequest.MockHandler(
+        using var mockMsgHandler = new MockHandler(
             (request) =>
             {
                 return new HttpResponseMessage(
@@ -47,21 +47,33 @@ public class OpenAIHistoryTests
         foreach (var kv in param)
             ps.AddParameter(kv.Key, kv.Value);
 
-        var result = ps.Invoke<OpenAIResponse>().ToList();
+        var result = ps.Invoke<Response>().ToList();
         Assert.IsNotNull(result);
 
         // Test Get
         ps.Commands = new();
-        ps.AddCommand("Get-OpenAIResponseHistory").AddParameter("CommandCategory", OpenAICategory.Text);
-        var history = ps.Invoke<IEnumerable<IEnumerable<OpenAIResponse>>>().ToList();
+        ps.AddCommand("Get-OpenAIResponseHistory").AddParameter("CommandCategory", TaskCategory.Text);
+        var history = ps.Invoke<IEnumerable<IEnumerable<Response>>>().ToList();
         Assert.IsNotNull(history);
         Assert.IsTrue(history.Count > 0);
 
         // Test Backup
         ps.Commands = new();
-        ps.AddCommand("Backup-OpenAIResponseHistory").AddParameter("CommandCategory", OpenAICategory.Text);
+        ps.AddCommand("Backup-OpenAIResponseHistory")
+        .AddParameter("CommandCategory", TaskCategory.Text)
+        .AddParameter("ClearCache");
         var output = ps.Invoke().ToList();
         Assert.IsTrue(Directory.GetFiles(System.IO.Path.Join(localAppDataPath, "SessionHistory")).Length > 0);
+
+        var files = Directory.GetFiles(System.IO.Path.Join(localAppDataPath, "SessionHistory"));
+        using var ps2 = PowerShellTestBase.CreatePowerShell(new[] { "Restore-OpenAIResponseHistory" },
+                                                           new[] { typeof(RestoreOpenAIResponseHistory) });
+        ps2.AddCommand("Restore-OpenAIResponseHistory")
+        .AddParameter("CommandCategory", TaskCategory.Text)
+        .AddParameter("Path", files.First());
+
+        output = ps2.Invoke().ToList();
+        Assert.IsFalse(ps2.HadErrors);
     }
 
     public static IEnumerable<object[]> ParamSet

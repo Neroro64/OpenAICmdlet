@@ -1,9 +1,9 @@
 ﻿using System.Text;
-namespace OpenAICmdlet;
+namespace OpenAI;
 
-internal static class PromptBuilder
+public static class PromptBuilder
 {
-    internal static string BuildPrompt(string prompt, string? contextFilePath)
+    public static string BuildPrompt(string prompt, string? contextFilePath)
     {
         StringBuilder promptBuilder = new();
         if (contextFilePath != null && File.Exists(contextFilePath))
@@ -19,9 +19,9 @@ internal static class PromptBuilder
         return promptBuilder.ToString();
     }
 
-    internal static List<Dictionary<string, string>> BuildChat(string initMessage, string prompt,
+    public static ICollection<Dictionary<string, string>> BuildChat(string initMessage, string prompt,
                                                                string? contextFilePath,
-                                                               List<OpenAIResponse>? history)
+                                                               ICollection<Response>? history)
     {
         var messages = new List<Dictionary<string, string>>() { new() {
             ["role"] = "system",
@@ -40,7 +40,7 @@ internal static class PromptBuilder
                     new Dictionary<string, string>()
                     {
                         ["role"] = "assistant",
-                        ["content"] = response.Response.First()
+                        ["content"] = response.Body.First()
                     });
             }
         }

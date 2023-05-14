@@ -18,6 +18,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Cmdlet\Cmdlet.csproj" />
+    <ProjectReference Include="..\OpenAI\OpenAI.csproj" />
   </ItemGroup>
 
 </Project>

@@ -1,8 +1,8 @@
-﻿namespace OpenAICmdlet;
-internal static class OpenAIEndpoint
+﻿namespace OpenAI;
+public static class Endpoint
 {
-    internal const string Root = "https://api.openai.com/v1";
-    internal static string TaskEndpoint(OpenAITask task) => task switch
+    public const string Root = "https://api.openai.com/v1";
+    public static string TaskEndpoint(OpenAITask task) => task switch
     {
         OpenAITask.TextCompletion => "/completions",
         OpenAITask.ChatCompletion => "/chat/completions",
@@ -14,6 +14,6 @@ internal static class OpenAIEndpoint
         _ => throw new ArgumentException("Invalid OpenAITask provided.")
     };
 
-    internal static readonly Uri Default = Get(OpenAITask.ChatCompletion);
-    internal static Uri Get(OpenAITask task) => new Uri(Root + TaskEndpoint(task));
+    public static readonly Uri Default = Get(OpenAITask.ChatCompletion);
+    public static Uri Get(OpenAITask task) => new Uri(Root + TaskEndpoint(task));
 }

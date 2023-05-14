@@ -1,24 +1,24 @@
 ﻿namespace OpenAICmdlet;
 
 [Cmdlet(VerbsCommon.Get, "OpenAIReponseHistory")]
-[OutputType(typeof(List<List<OpenAIResponse>>))]
+[OutputType(typeof(List<List<Response>>))]
 public class GetOpenAIResponseHistoryCommand : MyCmdlet
 {
     [Parameter()]
-    [ValidateSet(nameof(OpenAICategory.Text), nameof(OpenAICategory.Image), nameof(OpenAICategory.Audio))]
-    public OpenAICategory CommandCategory { get; init; } = OpenAICategory.Text;
+    [ValidateSet(nameof(TaskCategory.Text), nameof(TaskCategory.Image), nameof(TaskCategory.Audio))]
+    public TaskCategory CommandCategory { get; init; } = TaskCategory.Text;
 
     protected override void EndProcessing()
     {
         switch (CommandCategory)
         {
-            case OpenAICategory.Text:
+            case TaskCategory.Text:
                 WriteObject(InvokeOpenAITextCommand.History);
                 break;
-            case OpenAICategory.Image:
+            case TaskCategory.Image:
                 WriteObject(InvokeOpenAIImageCommand.History);
                 break;
-            case OpenAICategory.Audio:
+            case TaskCategory.Audio:
                 WriteObject(InvokeOpenAIAudioCommand.History);
                 break;
         }

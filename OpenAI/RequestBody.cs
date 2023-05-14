@@ -1,8 +1,7 @@
-﻿using System.Text.Json.Serialization;
-namespace OpenAICmdlet;
+﻿namespace OpenAI;
 
 [Serializable]
-public sealed class OpenAIRequestBody
+public sealed class RequestBody
 {
     #region Text parameters
     public string? Prompt { get; set; }

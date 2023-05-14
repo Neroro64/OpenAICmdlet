@@ -1,4 +1,4 @@
-﻿namespace OpenAICmdlet;
+﻿namespace OpenAI;
 public static class ExtensionMethods
 {
     public static void ThrowIfFileNotFound(this string path)

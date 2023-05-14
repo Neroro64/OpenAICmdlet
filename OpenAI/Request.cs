@@ -1,23 +1,23 @@
 ﻿using System.Net.Http.Json;
 using System.Net.Http.Headers;
-namespace OpenAICmdlet;
+namespace OpenAI;
 
-public class OpenAIRequest
+public class Request
 {
     public Uri EndPoint { get; init; }
 
-    public OpenAIRequestBody Body { get; init; }
+    public RequestBody Body { get; init; }
     public bool UploadFile { get; init; }
 
     public string APIKeyPath { get; init; }
     private List<IDisposable> disposables = new List<IDisposable>();
 
-    public OpenAIRequest(Uri endPoint, OpenAIRequestBody body, string? apiKeyPath,
+    public Request(Uri endPoint, RequestBody body, string? apiKeyPath,
                          bool uploadFile = false)
     {
-        if (!typeof(OpenAIRequestBody).IsSerializable)
+        if (!typeof(RequestBody).IsSerializable)
             throw new InvalidOperationException(
-                "(OpenAIRequestBody) Request content type must be serializable!");
+                "(RequestBody) Request content type must be serializable!");
         EndPoint = endPoint;
         Body = body;
         APIKeyPath = apiKeyPath ?? SecureAPIKey.DefaultAPIKeyPath;
@@ -93,7 +93,7 @@ public class OpenAIRequest
         }
         else
         {
-            JsonContent content = JsonContent.Create<OpenAIRequestBody>(
+            JsonContent content = JsonContent.Create<RequestBody>(
                 Body, new MediaTypeWithQualityHeaderValue("application/json"),
                 Constant.SerializerOption);
             disposables.Add(content);
@@ -116,7 +116,7 @@ public class OpenAIRequest
         }
     }
     private static string getFileType(string filePath) => Path.GetExtension(filePath).Trim('.');
-    ~OpenAIRequest()
+    ~Request()
     {
         foreach (var disposable in disposables)
         {

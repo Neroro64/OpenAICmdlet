@@ -8,7 +8,7 @@ public class InvokeOpenAIImageCommandTests
     {
         using var ps = PowerShellTestBase.CreatePowerShell("Invoke-OpenAIImage",
                                                            typeof(InvokeOpenAIImageCommand));
-        using var mockMsgHandler = new WebRequest.MockHandler(
+        using var mockMsgHandler = new MockHandler(
             (request) =>
             {
                 return new HttpResponseMessage(System.Net.HttpStatusCode.OK)
@@ -43,7 +43,7 @@ public class InvokeOpenAIImageCommandTests
         ArgumentNullException.ThrowIfNull(param);
         string content = MockOpenAIResponseData.ImageResponse;
 
-        using var mockMsgHandler = new WebRequest.MockHandler(
+        using var mockMsgHandler = new MockHandler(
             (request) =>
             {
                 return new HttpResponseMessage(
@@ -57,12 +57,12 @@ public class InvokeOpenAIImageCommandTests
         foreach (var kv in param)
             ps.AddParameter(kv.Key, kv.Value);
 
-        var result = ps.Invoke<OpenAIResponse>().ToList();
+        var result = ps.Invoke<Response>().ToList();
         Assert.IsNotNull(result);
         Assert.AreEqual(result.Count, 1);
 
         // Verify response content
-        Assert.IsTrue(result.First().Response.First().Contains(
+        Assert.IsTrue(result.First().Body.First().Contains(
             "https", StringComparison.InvariantCultureIgnoreCase));
     }
 
@@ -77,7 +77,7 @@ public class InvokeOpenAIImageCommandTests
             .AddParameter("Mode", OpenAITask.ImageVariation)
             .AddParameter("ImagePath", "../../../../OpenAICmdlet/resources/logo.png");
 
-        var result = ps.Invoke<OpenAIResponse>().ToList();
+        var result = ps.Invoke<Response>().ToList();
         Assert.IsNotNull(result);
         Assert.AreEqual(result.Count, 1);
     }

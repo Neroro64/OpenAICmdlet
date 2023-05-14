@@ -6,7 +6,7 @@ public class OpenAIRequestTests
     [TestMethod]
     public void CanInvokeRequest()
     {
-        using var mockMsgHandler = new WebRequest.MockHandler(
+        using var mockMsgHandler = new MockHandler(
             (request) =>
             {
                 return new HttpResponseMessage(System.Net.HttpStatusCode.OK)
@@ -16,9 +16,9 @@ public class OpenAIRequestTests
             });
 
         WebRequest.AddHttpClient(SecureAPIKey.DefaultAPIKeyPath, mockMsgHandler, "abcd1234");
-        var mockRequest = new Mock<OpenAIRequest>(
-            OpenAIEndpoint.Default,
-            new OpenAIRequestBody()
+        var mockRequest = new Mock<Request>(
+            Endpoint.Default,
+            new RequestBody()
             {
                 Prompt = "Hello World",
                 Messages =

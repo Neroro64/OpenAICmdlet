@@ -2,11 +2,9 @@
 
 [Cmdlet(VerbsLifecycle.Invoke, "OpenAIImage", SupportsShouldProcess = true)]
 [Alias("idalle")]
-[OutputType(typeof(OpenAIResponse))]
-public class InvokeOpenAIImageCommand : MyCmdlet
+[OutputType(typeof(Response))]
+public class InvokeOpenAIImageCommand : MyOpenAICmdlet
 {
-    internal static List<List<OpenAIResponse>> History = new();
-
     [Parameter(Position = 0, ValueFromPipeline = true, ValueFromPipelineByPropertyName = true,
                HelpMessage = "The prompt(s) to generate images or guide image edits")]
     [ValidateLength(0, 4096)]
@@ -53,12 +51,12 @@ public class InvokeOpenAIImageCommand : MyCmdlet
         get; set;
     }
 
-    private OpenAIRequestBody _requestBody = new();
+    private RequestBody _requestBody = new();
     protected override void BeginProcessing()
     {
         _requestBody = new()
         {
-            Model = OpenAIModel.TaskModel(Mode),
+            Model = Model.TaskModel(Mode),
             N = Samples,
             Size = ImageSize,
             Temperature = 0,
@@ -100,7 +98,7 @@ public class InvokeOpenAIImageCommand : MyCmdlet
         }
 
         // Construct the HTTP request
-        var apiRequest = new OpenAIRequest(endPoint: OpenAIEndpoint.Get(Mode), body: _requestBody,
+        var apiRequest = new Request(endPoint: Endpoint.Get(Mode), body: _requestBody,
                                            apiKeyPath: APIKeyPath, uploadFile: uploadFile);
 
         if (ShouldProcess(generateShouldProcessMsg(apiRequest),
@@ -134,7 +132,7 @@ public class InvokeOpenAIImageCommand : MyCmdlet
         }
     }
 
-    private string generateShouldProcessMsg(OpenAIRequest request)
+    private string generateShouldProcessMsg(Request request)
     {
         float cost = 0;
         switch (Mode)
@@ -161,10 +159,10 @@ Request body : {JsonSerializer.Serialize(request.Body, Constant.SerializerOption
 ";
     }
 
-    private OpenAIResponse parseResponseContent(JsonNode responseContent)
+    private Response parseResponseContent(JsonNode responseContent)
     {
         var query = from data in responseContent["data"]?.AsArray() select data["url"]?.ToString();
 
-        return new OpenAIResponse() { Prompt = this.Prompt, Response = query.ToArray<string>() };
+        return new Response() { Prompt = this.Prompt, Body = query.ToArray<string>() };
     }
 }

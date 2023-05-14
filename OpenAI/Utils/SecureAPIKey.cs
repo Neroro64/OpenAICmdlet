@@ -1,16 +1,16 @@
 ﻿using System.Security.Cryptography;
-namespace OpenAICmdlet;
+namespace OpenAI;
 
-internal static class SecureAPIKey
+public static class SecureAPIKey
 {
     private static ReaderWriterLock _rwLock = new();
-    internal static string DefaultAPIKeyPath =
+    public static string DefaultAPIKeyPath {get;} =
         System.Environment.GetEnvironmentVariable("OPENAI_APIKEY") ??
         System.IO.Path.Join(
             Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
             "OpenAICmdlet/API.key");
 
-    internal static void EncryptToFile(string path, string apiKey)
+    public static void EncryptToFile(string path, string apiKey)
     {
         if (!File.Exists(path))
             path.CreateParentDirectories();
@@ -40,7 +40,7 @@ internal static class SecureAPIKey
         }
     }
 
-    internal static string DecryptFromFile(string? path)
+    public static string DecryptFromFile(string? path)
     {
         path ??= DefaultAPIKeyPath;
         if (!File.Exists(path))

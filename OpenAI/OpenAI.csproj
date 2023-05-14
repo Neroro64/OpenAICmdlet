@@ -1,15 +1,10 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-
   <PropertyGroup>
-    <AssemblyName>OpenAICmdlet</AssemblyName>
+    <AssemblyName>OpenAI</AssemblyName>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="System.Management.Automation" Version="7.3.3" />
-    <InternalsVisibleTo Include="Cmdlet.Tests" />
   </ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\OpenAI\OpenAI.csproj" />
-  </ItemGroup>
 </Project>
