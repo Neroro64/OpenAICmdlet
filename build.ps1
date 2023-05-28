@@ -69,7 +69,8 @@ if (-not $NoHelpFiles) {
         # Generate the help files
         Import-Module '$OutputPath/$ModuleName.dll'
         Import-Module platyPS
-        `$docsDir = Join-Path $OutputPath -ChildPath 'docs'
+        `$docsDir = Join-Path $PSScriptRoot -ChildPath 'docs'
+        `$externalHelpDir = Join-Path $OutputPath -ChildPath 'en-US'
         `$platyPSParameters = @{
             Module                = '$ModuleName'
             OutputFolder          = `$docsDir
@@ -86,7 +87,7 @@ if (-not $NoHelpFiles) {
             New-MarkdownHelp @platyPSParameters
             New-MarkdownAboutHelp -OutputFolder `$docsDir -AboutName '$ModuleName'
         }
-        New-ExternalHelp -Path `$docsDir -OutputPath `$docsDir
+        New-ExternalHelp -Path `$docsDir -OutputPath `$externalHelpDir
     }"
 }
 
