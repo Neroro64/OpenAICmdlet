@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Types>
+    <Type>
+        <Name>OpenAI.Response</Name>
+        <Members>
+        <ScriptProperty>
+            <Name>Samples</Name>
+            <GetScriptBlock>
+                $id=0;$this.Body
+                | ForEach-Object {[PSCustomObject]@{SampleID=$id++; Sample=$_}}
+            </GetScriptBlock>
+        </ScriptProperty>
+        </Members>
+    </Type>
+</Types>

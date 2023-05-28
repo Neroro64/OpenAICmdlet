@@ -9,7 +9,7 @@
 @{
 
     # Script module or binary module file associated with this manifest.
-    RootModule        = 'OpenAICmdlet.dll'
+    # RootModule        = 'OpenAICmdlet.dll'
 
     # Version number of this module.
     ModuleVersion     = '1.0.0'
@@ -18,7 +18,7 @@
     # CompatiblePSEditions = @()
 
     # ID used to uniquely identify this module
-    GUID              = '2fbfa793-2934-494d-8e06-4a012526b06b'
+    # GUID              = '2fbfa793-2934-494d-8e06-4a012526b06b'
 
     # Author of this module
     Author            = 'Nuo Chen'
@@ -30,7 +30,7 @@
     Copyright         = '(c) Nuo Chen. All rights reserved.'
 
     # Description of the functionality provided by this module
-    Description       = 'A PowerShell module with basic cmdlets for interacting with OpenAI''s models using the provided API'
+    Description       = 'A PowerShell module with basic cmdlets for interacting with OpenAI''s models through their API'
 
     # Minimum version of the PowerShell engine required by this module
     # PowerShellVersion = ''
@@ -60,10 +60,10 @@
     # ScriptsToProcess = @()
 
     # Type files (.ps1xml) to be loaded when importing this module
-    # TypesToProcess = @()
+    TypesToProcess    = @("OpenAICmdlet.types.ps1xml")
 
     # Format files (.ps1xml) to be loaded when importing this module
-    # FormatsToProcess = @()
+    FormatsToProcess  = @("OpenAICmdlet.format.ps1xml")
 
     # Modules to import as nested modules of the module specified in RootModule/ModuleToProcess
     # NestedModules = @()
@@ -77,9 +77,7 @@
         "Set-OpenAIKey",
         "Invoke-OpenAIText",
         "Invoke-OpenAIImage",
-        "Invoke-OpenAIAudio",
-        "Get-OpenAIReponseHistory",
-        "Backup-OpenAIReponseHistory"
+        "Invoke-OpenAIAudio"
     )
 
     # Variables to export from this module
@@ -139,6 +137,5 @@
 
     # Default prefix for commands exported from this module. Override the default prefix using Import-Module -Prefix.
     # DefaultCommandPrefix = ''
-
 }
 

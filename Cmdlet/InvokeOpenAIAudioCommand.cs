@@ -3,7 +3,7 @@
 [Cmdlet(VerbsLifecycle.Invoke, "OpenAIAudio", SupportsShouldProcess = true)]
 [Alias("iwhisper")]
 [OutputType(typeof(Response))]
-public class InvokeOpenAIAudioCommand : MyOpenAICmdlet
+public class InvokeOpenAIAudioCommand : MyCmdlet
 {
     [Parameter(Mandatory = true, Position = 0, ValueFromPipeline = true,
                ValueFromPipelineByPropertyName = true,
@@ -97,7 +97,6 @@ public class InvokeOpenAIAudioCommand : MyOpenAICmdlet
             WriteVerbose($"Quota usage: {responseContent!["usage"]}");
 
             var response = parseResponseContent(responseContent);
-            History.Add(new() { response });
 
             WriteObject(response);
         }

@@ -3,7 +3,7 @@
 [Cmdlet(VerbsLifecycle.Invoke, "OpenAIText", SupportsShouldProcess = true)]
 [Alias("igpt")]
 [OutputType(typeof(Response))]
-public class InvokeOpenAITextCommand : MyOpenAICmdlet
+public class InvokeOpenAITextCommand : MyCmdlet
 {
     [Parameter(Mandatory = true, Position = 0, ValueFromPipeline = true,
                ValueFromPipelineByPropertyName = true,
@@ -92,17 +92,11 @@ public class InvokeOpenAITextCommand : MyOpenAICmdlet
         get; set;
     }
 
-    [Parameter(HelpMessage = "Continue on a previous session")]
-    public SwitchParameter ContinueSession
+    [Parameter(HelpMessage = "A session with previous response exchanges")]
+    public ICollection<Response>? ContinueSession
     {
-        get; set;
+        get; init;
     }
-
-    [Parameter(HelpMessage = "Species which session to continue")]
-    public int SessionID
-    {
-        get; set;
-    } = -1;
 
     [Parameter(HelpMessage = "Number of images that should be generated")]
     public int Samples
@@ -135,21 +129,6 @@ public class InvokeOpenAITextCommand : MyOpenAICmdlet
     protected override void ProcessRecord()
     {
         // Build the prompt
-        List<Response>? sessionToContinue = default;
-        if (ContinueSession)
-        {
-            if (SessionID >= History.Count)
-                WriteError(new ErrorRecord(
-                    new ArgumentException(
-                        "Invalid ContinueOnSessionID! It is greater that the number of sessions"),
-                    "Invalid ContinueOnSessionID", ErrorCategory.InvalidArgument, this));
-
-            else if (SessionID == -1)
-                sessionToContinue = History.LastOrDefault(new List<Response>());
-            else
-                sessionToContinue = History[SessionID];
-        }
-
         switch (Mode)
         {
             case OpenAITask.TextCompletion:
@@ -157,7 +136,7 @@ public class InvokeOpenAITextCommand : MyOpenAICmdlet
                 break;
             case OpenAITask.ChatCompletion:
                 _requestBody.Messages = PromptBuilder.BuildChat(ChatInitInstruction, Prompt,
-                                                                ContextFilePath, sessionToContinue);
+                                                                ContextFilePath, ContinueSession);
                 break;
             default:
                 throw new ArgumentException(
@@ -200,15 +179,6 @@ public class InvokeOpenAITextCommand : MyOpenAICmdlet
             WriteVerbose($"Quota usage: {responseContent!["usage"]}");
 
             var response = parseResponseContent(responseContent, Mode);
-            if (ContinueSession && History.Count > 0)
-            {
-                if (SessionID == -1)
-                    History[^1].Add(response);
-                else
-                    History[SessionID].Add(response);
-            }
-            else
-                History.Add(new() { response });
 
             WriteObject(response);
         }

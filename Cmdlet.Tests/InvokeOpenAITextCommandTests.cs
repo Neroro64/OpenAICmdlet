@@ -81,53 +81,6 @@ public class InvokeOpenAITextCommandTests
     }
 
     [TestMethod]
-    public void CanContinueChat()
-    {
-        using var ps = PowerShellTestBase.CreatePowerShell("Invoke-OpenAIText",
-                                                           typeof(InvokeOpenAITextCommand));
-        (string content, string response) =
-            (MockOpenAIResponseData.ChatResponse, MockOpenAIResponseData.ChatResponseText);
-
-        int conversationLength = 0;
-        bool firstSession = true;
-        using var mockMsgHandler = new MockHandler(
-            (request) =>
-            {
-                var messageCount = ((RequestBody?)(request.Content as JsonContent)?.Value)
-                                       ?.Messages?.Count();
-                if (firstSession)
-                {
-                    firstSession = false;
-                    conversationLength = messageCount ?? 0;
-                }
-                else
-                {
-                    Assert.IsTrue(messageCount == conversationLength + 2);
-                }
-                return new HttpResponseMessage(
-                    System.Net.HttpStatusCode.OK)
-                { Content = new StringContent(content) };
-            });
-
-        WebRequest.AddHttpClient(SecureAPIKey.DefaultAPIKeyPath, mockMsgHandler, "abcd1234");
-
-        ps!.AddCommand("Invoke-OpenAIText")
-            .AddParameter("Prompt", "Hello")
-            .AddParameter("Mode", OpenAITask.ChatCompletion)
-            .AddParameter("ContextFilePath", "../../../Resources/MockContextFile.txt")
-            .AddParameter("ChatInitInstruction", "This is a test")
-            .AddParameter("ContinueSession", true);
-
-        var result1 = ps.Invoke<Response>().ToList();
-        Assert.IsNotNull(result1);
-        Assert.IsFalse(ps.HadErrors);
-
-        var result2 = ps.Invoke<Response>().ToList();
-        Assert.IsNotNull(result2);
-        Assert.IsFalse(ps.HadErrors);
-    }
-
-    [TestMethod]
     public void CanContinueMultipleSession()
     {
         using var ps = PowerShellTestBase.CreatePowerShell("Invoke-OpenAIText",
@@ -170,31 +123,18 @@ public class InvokeOpenAITextCommandTests
         Assert.AreEqual(result1.First().Body.First(), textResponse);
         ps.Commands = new PSCommand();
 
-        // Second session
+        // Continue first session
         useChat = true;
+        checkForLength = true;
         ps!.AddCommand("Invoke-OpenAIText")
-            .AddParameter("Prompt", "Hello2")
+            .AddParameter("Prompt", "World")
             .AddParameter("Mode", OpenAITask.ChatCompletion)
-            .AddParameter("ContextFilePath", "../../../Resources/MockContextFile.txt");
+            .AddParameter("ContinueSession", result1);
 
         var result2 = ps.Invoke<Response>().ToList();
         Assert.IsNotNull(result2);
         Assert.IsFalse(ps.HadErrors);
         Assert.AreEqual(result2.First().Body.First(), chatResponse);
-        ps.Commands = new PSCommand();
-
-        // Continue first session
-        checkForLength = true;
-        ps!.AddCommand("Invoke-OpenAIText")
-            .AddParameter("Prompt", "World")
-            .AddParameter("Mode", OpenAITask.ChatCompletion)
-            .AddParameter("SessionID", 0)
-            .AddParameter("ContinueSession", true);
-
-        var result3 = ps.Invoke<Response>().ToList();
-        Assert.IsNotNull(result3);
-        Assert.IsFalse(ps.HadErrors);
-        Assert.AreEqual(result3.First().Body.First(), chatResponse);
     }
 
     [TestMethod]
