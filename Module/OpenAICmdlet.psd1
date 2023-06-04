@@ -9,7 +9,7 @@
 @{
 
     # Script module or binary module file associated with this manifest.
-    # RootModule        = 'OpenAICmdlet.dll'
+    RootModule        = 'OpenAICmdlet.dll'
 
     # Version number of this module.
     ModuleVersion     = '1.0.0'
@@ -18,7 +18,7 @@
     # CompatiblePSEditions = @()
 
     # ID used to uniquely identify this module
-    # GUID              = '2fbfa793-2934-494d-8e06-4a012526b06b'
+    GUID              = '2fbfa793-2934-494d-8e06-4a012526b06b'
 
     # Author of this module
     Author            = 'Nuo Chen'
