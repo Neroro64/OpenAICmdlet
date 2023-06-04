@@ -29,22 +29,6 @@ For API details, please check [OpenAI API Documentation](https://platform.openai
 
 For more usage examples, please check [OpenAI API Examples](https://platform.openai.com/examples)
 
-## Cmdlets
-### [Get-OpenAIKey](Get-OpenAIKey.md)
-Retrieves the OpenAI API key from the specified file path.
-
-### [Invoke-OpenAIAudio](Invoke-OpenAIAudio.md)
-Executes audio-related tasks using OpenAI's models.
-
-### [Invoke-OpenAIAudio](Invoke-OpenAIAudio.md)
-Executes audio-related tasks using OpenAI's models.
-
-### [Invoke-OpenAIAudio](Invoke-OpenAIAudio.md)
-Executes audio-related tasks using OpenAI's models.
-
-### [Invoke-OpenAIAudio](Invoke-OpenAIAudio.md)
-Executes audio-related tasks using OpenAI's models.
-
 ## Requirements
 - [OpenAI API Key]( https://openai.com/blog/openai-api )
 - [PowerShell >= 7.3.3](https://github.com/PowerShell/powershell/releases)
