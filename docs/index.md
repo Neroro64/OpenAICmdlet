@@ -1,6 +1,7 @@
 # OpenAI Cmdlet
 A simple PowerShell cmdlet for invoking OpenAI API to perfom and text, image and speech-to-text related tasks. 
 
+
 ```powershell
 # The following command is equivalent to 
 # Invoke-OpenAIText -Prompt "..." -Mode:ChatCompletion -Temperature:1 -Samples:1
@@ -27,6 +28,22 @@ Response : {send-msg ind ski-store Can I get my skis fixed before I leave on Thu
 For API details, please check [OpenAI API Documentation](https://platform.openai.com/docs/introduction/overview)
 
 For more usage examples, please check [OpenAI API Examples](https://platform.openai.com/examples)
+
+## Cmdlets
+### [Get-OpenAIKey](Get-OpenAIKey.md)
+Retrieves the OpenAI API key from the specified file path.
+
+### [Invoke-OpenAIAudio](Invoke-OpenAIAudio.md)
+Executes audio-related tasks using OpenAI's models.
+
+### [Invoke-OpenAIAudio](Invoke-OpenAIAudio.md)
+Executes audio-related tasks using OpenAI's models.
+
+### [Invoke-OpenAIAudio](Invoke-OpenAIAudio.md)
+Executes audio-related tasks using OpenAI's models.
+
+### [Invoke-OpenAIAudio](Invoke-OpenAIAudio.md)
+Executes audio-related tasks using OpenAI's models.
 
 ## Requirements
 - [OpenAI API Key]( https://openai.com/blog/openai-api )
@@ -176,7 +193,7 @@ For more details, see https://platform.openai.com/docs/guides/images/introductio
 idalle "A happy man eating hot dog" | Select Response -First 1 | Start-process
 # The response contains an url to the generated image. By pipling this url to Start-Process we can open the link in a browser
 ```
-![the_generated_image]( docs/resources/a_happy_man_eating_hot_dog.png )
+![the_generated_image]( resources/a_happy_man_eating_hot_dog.png )
 
 ---
 
@@ -184,7 +201,7 @@ idalle "A happy man eating hot dog" | Select Response -First 1 | Start-process
 # Use one of the prompt that we generated above.
 idalle "Create a landscape painting of a forest in autumn." | Select Response -First 1 | Start-process
 ```
-![the_painting]( docs/resources/generated_img.png )
+![the_painting]( resources/generated_img.png )
 
 ---
 
@@ -192,7 +209,7 @@ idalle "Create a landscape painting of a forest in autumn." | Select Response -F
 # Use the generated image as input to generate more variations
 idalle -Mode:Variation -ImagePath:"resources/generated_img.png" -ImageSize:"256x256" | Select Response -First 1 | Start-process
 ```
-![the_painting]( docs/resources/generated_img_variation.png )
+![the_painting]( resources/generated_img_variation.png )
 
 ### `Invoke-OpenAIAudio` (Speech-to-text) [Alias='iwhisper']
 A simple PowerShell function for invoking OpenAI's API to perform the speech-to-text related tasks such as
@@ -209,4 +226,4 @@ iwhisper -Mode:Transcription -AudioPath:"resources/f7879738_nohash_0.wav" -Audio
 ```
 Prompt   :
 Response : {down,}
-```
+`

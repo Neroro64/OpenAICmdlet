@@ -23,8 +23,8 @@ public class InvokeOpenAIImageCommandTests
             .AddParameter("Prompt", "Hello World")
             .AddParameter("Mode", OpenAITask.ImageGeneration)
             .AddParameter("ImageSize", "1024x1024")
-            .AddParameter("ImagePath", "../../../../resources/a_happy_man_eating_hot_dog.png")
-            .AddParameter("ImageMaskPath", "../../../../resources/a_happy_man_eating_hot_dog.png")
+            .AddParameter("ImagePath", "../../../../docs/resources/a_happy_man_eating_hot_dog.png")
+            .AddParameter("ImageMaskPath", "../../../../docs/resources/a_happy_man_eating_hot_dog.png")
             .AddParameter("Samples", 1234)
             .AddParameter("WhatIf");
 
@@ -92,14 +92,14 @@ public class InvokeOpenAIImageCommandTests
                     ["Prompt"] = "Hello World",
                     ["Mode"] = OpenAITask.ImageEdit,
                     ["ImageSize"] = "512x512",
-                    ["ImagePath"] = "../../../../resources/a_happy_man_eating_hot_dog.png",
-                    ["ImageMaskPath"] = "../../../../resources/a_happy_man_eating_hot_dog.png",
+                    ["ImagePath"] = "../../../../docs/resources/a_happy_man_eating_hot_dog.png",
+                    ["ImageMaskPath"] = "../../../../docs/resources/a_happy_man_eating_hot_dog.png",
                     ["Samples"] = 1234,
                 } },
                 new object[] { new Dictionary<string, object>() {
                     ["Mode"] = OpenAITask.ImageVariation,
                     ["ImageSize"] = "512x512",
-                    ["ImagePath"] = "../../../../resources/a_happy_man_eating_hot_dog.png",
+                    ["ImagePath"] = "../../../../docs/resources/a_happy_man_eating_hot_dog.png",
                     ["Samples"] = 1234,
                 } }
             };

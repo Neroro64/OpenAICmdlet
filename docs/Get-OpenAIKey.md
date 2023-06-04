@@ -1,4 +1,4 @@
----
+﻿---
 external help file: OpenAICmdlet.dll-Help.xml
 Module Name: OpenAICmdlet
 online version:

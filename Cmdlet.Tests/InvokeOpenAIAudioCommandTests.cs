@@ -22,7 +22,7 @@ public class InvokeOpenAIAudioCommandTests
         ps!.AddCommand("Invoke-OpenAIAudio")
             .AddParameter("Prompt", "Hello world")
             .AddParameter("Mode", OpenAITask.AudioTranscription)
-            .AddParameter("AudioPath", "../../../../resources/f7879738_nohash_0.wav")
+            .AddParameter("AudioPath", "../../../../docs/resources/f7879738_nohash_0.wav")
             .AddParameter("WhatIf");
 
         var result = ps.Invoke().ToList();
@@ -71,7 +71,7 @@ public class InvokeOpenAIAudioCommandTests
                                                            typeof(InvokeOpenAIAudioCommand));
 
         ps!.AddCommand("Invoke-OpenAIAudio")
-            .AddParameter("AudioPath", "../../../../resources/f7879738_nohash_0.wav");
+            .AddParameter("AudioPath", "../../../../docs/resources/f7879738_nohash_0.wav");
 
         var result = ps.Invoke<Response>().ToList();
         Assert.IsNotNull(result);
@@ -84,18 +84,18 @@ public class InvokeOpenAIAudioCommandTests
             return new[] {
                 new object[] { new Dictionary<
                     string, object>() { ["AudioPath"] =
-                                            "../../../../resources/f7879738_nohash_0.wav" } },
+                                            "../../../../docs/resources/f7879738_nohash_0.wav" } },
                 new object[] { new Dictionary<string, object>() {
                     ["Prompt"] = "Hello World",
                     ["AudioLanguage"] = "en",
                     ["Mode"] = OpenAITask.AudioTranscription,
-                    ["AudioPath"] = "../../../../resources/f7879738_nohash_0.wav",
+                    ["AudioPath"] = "../../../../docs/resources/f7879738_nohash_0.wav",
                 } },
                 new object[] { new Dictionary<
                     string, object>() { ["Prompt"] = "Hello World", ["AudioLanguage"] = "en",
                                         ["Mode"] = OpenAITask.AudioTranslation,
                                         ["AudioPath"] =
-                                            "../../../../resources/f7879738_nohash_0.wav",
+                                            "../../../../docs/resources/f7879738_nohash_0.wav",
                                         ["Temperature"] = 2f } }
             };
         }

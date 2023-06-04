@@ -54,12 +54,12 @@ Copy-Item -Path "$PSScriptRoot/Module/*" -Destination $OutputPath
 $manifest = Test-ModuleManifest -Path "$OutputPath/$ModuleName.psd1"
 
 if ($BumpVersionMinor) {
-    $manifest.Version = [Version]::New($manifest.Version.Major, $manifest.Version.Minor + 1)
-    Update-ModuleManifest -Path "$OutputPath/$ModuleName.psd1" -ModuleVersion $manifest.Version
+    $newVersion = [Version]::New($manifest.Version.Major, $manifest.Version.Minor + 1)
+    Update-ModuleManifest -Path "$OutputPath/$ModuleName.psd1" -ModuleVersion $newVersion
 }
 elseif ($BumpVersionMajor) {
-    $manifest.Version = [Version]::New($manifest.Version.Major + 1, 0)
-    Update-ModuleManifest -Path "$OutputPath/$ModuleName.psd1" -ModuleVersion $manifest.Version
+    $newVersion = [Version]::New($manifest.Version.Major + 1, 0)
+    Update-ModuleManifest -Path "$OutputPath/$ModuleName.psd1" -ModuleVersion $newVersion
 }
 
 
@@ -81,7 +81,7 @@ if (-not $NoHelpFiles) {
         }
 
         if (Test-Path `$docsDir) {
-            Update-MarkdownHelpModule -Path `$docsDir -RefreshModulePage
+            Update-MarkdownHelpModule -Path `$docsDir -RefreshModulePage -Force
         }
         else {
             New-MarkdownHelp @platyPSParameters

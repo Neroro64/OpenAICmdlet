@@ -5,46 +5,41 @@ online version:
 schema: 2.0.0
 ---
 
-# Invoke-OpenAIAudio
+# Invoke-OpenAIText
 
 ## SYNOPSIS
-Executes audio-related tasks using OpenAI's models.
+Generates completions for text prompts using OpenAI's language model.
 
 ## SYNTAX
 
 ```
-Invoke-OpenAIAudio [-AudioPath] <String> [-Mode <OpenAITask>] [-Prompt <String>] [-AudioLanguage <String>]
- [-Temperature <Single>] [-APIKeyPath <String>] [-ProgressAction <ActionPreference>] [-WhatIf] [-Confirm]
- [<CommonParameters>]
+Invoke-OpenAIText [-Prompt] <String> [-Mode <OpenAITask>] [-ContextFilePath <String>] [-Suffix <String>]
+ [-MaxTokens <Int32>] [-Temperature <Single>] [-Top_p <Single>] [-PrecencePenalty <Single>]
+ [-FrequencyPenalty <Single>] [-ChatInitInstruction <String>]
+ [-StopSequences <System.Collections.Generic.IEnumerable`1[System.String]>]
+ [-ContinueSession <System.Collections.Generic.ICollection`1[OpenAI.Response]>] [-Samples <Int32>]
+ [-APIKeyPath <String>] [-ProgressAction <ActionPreference>] [-WhatIf] [-Confirm] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
-The `Invoke-OpenAIAudio` cmdlet allows you to perform audio-related tasks using OpenAI's models. It leverages the power of deep learning to provide speech-to-text transcription or audio translation capabilities.
+The Invoke-OpenAIText cmdlet allows you to generate completions for text prompts using OpenAI's language model. It provides a powerful interface for generating text-based responses, whether for general text completions or chat-based interactions.
 
 ## EXAMPLES
 
-### Example 1: Perform speech-to-text transcription
+### Example 1 - Generate a text completion based on a prompt
 ```powershell
-Invoke-OpenAIAudio -AudioPath "C:\Audio\speech.mp3" -Mode AudioTranscription
+Invoke-OpenAIText -Prompt "Once upon a time" -Mode TextCompletion
 ```
 
-This example transcribes the speech from the audio file located at "C:\Audio\speech.mp3" using OpenAI's models.
-
-### Example 2: Perform audio translation
+### Example 2 - Generate chat-based responses
 ```powershell
-Invoke-OpenAIAudio -AudioPath "C:\Audio\conversation.wav" -Mode AudioTranslation -AudioLanguage "en" -Prompt "Translate the conversation from English to French."
+Invoke-OpenAIText -Prompt "What is the weather like today?" -Mode ChatCompletion -ChatInitInstruction "You are a helpful assistant"
 ```
 
-This example translates the conversation in the audio file located at "C:\Audio\conversation.wav" from English to French using OpenAI's models. The `-AudioLanguage` parameter specifies the input audio language as English, and the `-Prompt` parameter provides a prompt to guide the translation process.
-
-### Example 3: Specify custom API key path
+### Example 3 - Generate text completions with custom parameters
 ```powershell
-Invoke-OpenAIAudio -AudioPath "C:\Audio\audio.mp4" -APIKeyPath "C:\Keys\openai_key.txt"
+Invoke-OpenAIText -Prompt "Tell me a joke" -Mode TextCompletion -MaxTokens 50 -Temperature 0.5
 ```
-
-This example processes the audio file located at "C:\Audio\audio.mp4" using OpenAI's models. It specifies a custom API key path by using the `-APIKeyPath` parameter, which points to the file containing the OpenAI API key.
-
-Note: Ensure that you replace the file paths and language settings with appropriate values based on your requirements.
 
 ## PARAMETERS
 
@@ -63,9 +58,8 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -AudioLanguage
-The language of the input audio.
-Supplying the input language in ISO-639-1 format will improve accuracy and latency.
+### -ChatInitInstruction
+This instruction sets the initial setting of the chat model
 
 ```yaml
 Type: String
@@ -76,21 +70,6 @@ Required: False
 Position: Named
 Default value: None
 Accept pipeline input: False
-Accept wildcard characters: False
-```
-
-### -AudioPath
-Path to the input audio file
-
-```yaml
-Type: String
-Parameter Sets: (All)
-Aliases:
-
-Required: True
-Position: 0
-Default value: None
-Accept pipeline input: True (ByPropertyName, ByValue)
 Accept wildcard characters: False
 ```
 
@@ -109,14 +88,90 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
+### -ContextFilePath
+Path to a text file with extra context
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: True (ByPropertyName)
+Accept wildcard characters: False
+```
+
+### -ContinueSession
+A session with previous response exchanges
+
+```yaml
+Type: System.Collections.Generic.ICollection`1[OpenAI.Response]
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -FrequencyPenalty
+Positive values penalize new tokens based on their existing frequency in the text so far, decreasing the model's likelihood to repeat the same line verbatim.
+
+```yaml
+Type: Single
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -MaxTokens
+The maximum number of tokens to generate in the completion.
+
+```yaml
+Type: Int32
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
 ### -Mode
-Speect-to-text task
+Text completion mode. 
+Note:'ChatGPT' performs similar to 'TextCompletion' at 10% the price.
 
 ```yaml
 Type: OpenAITask
 Parameter Sets: (All)
 Aliases:
-Accepted values: AudioTranscription, AudioTranslation
+Accepted values: ChatCompletion, TextCompletion
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -PrecencePenalty
+Positive values penalize new tokens based on whether they appear in the text so far, increasing the model's likelihood to talk about new topics.
+
+```yaml
+Type: Single
+Parameter Sets: (All)
+Aliases:
 
 Required: False
 Position: Named
@@ -126,7 +181,53 @@ Accept wildcard characters: False
 ```
 
 ### -Prompt
-The prompt(s) to guide the mode's style or continue on previous audio segment
+The prompt(s) to generate completions for, encoded as a string
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: True
+Position: 0
+Default value: None
+Accept pipeline input: True (ByPropertyName, ByValue)
+Accept wildcard characters: False
+```
+
+### -Samples
+Number of images that should be generated
+
+```yaml
+Type: Int32
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -StopSequences
+Up to 4 sequences where the API will stop generating further tokens.
+The returned text will not contain the stop sequence.
+
+```yaml
+Type: System.Collections.Generic.IEnumerable`1[System.String]
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -Suffix
+The suffix that comes after a completion of inserted text.
 
 ```yaml
 Type: String
@@ -143,6 +244,22 @@ Accept wildcard characters: False
 ### -Temperature
 What sampling temperature to use, between 0 and 2.
 Higher values like 0.8 will make the output more random, while lower values like 0.2 will make it more focused and deterministic.
+
+```yaml
+Type: Single
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -Top_p
+An alternative to sampling with temperature, called nucleus sampling, where the model considers the results of the tokens with top_p probability mass.
+So 0.1 means only the tokens comprising the top 10% probability mass are considered.
 
 ```yaml
 Type: Single
@@ -192,12 +309,10 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 
 ## INPUTS
 
+### System.String
 ## OUTPUTS
 
+### OpenAI.Response
 ## NOTES
-This cmdlet requires a valid OpenAI API key for authentication and authorization. If the API key is not provided via the `APIKeyPath` parameter, the cmdlet uses the default API key.
 
 ## RELATED LINKS
-
-[Set-OpenAIKey](Set-OpenAIKey.md)
-

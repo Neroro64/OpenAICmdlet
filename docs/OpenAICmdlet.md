@@ -17,12 +17,12 @@ Retrieves the OpenAI API key from the specified file path.
 ### [Invoke-OpenAIAudio](Invoke-OpenAIAudio.md)
 Executes audio-related tasks using OpenAI's models.
 
-### [Invoke-OpenAIAudio](Invoke-OpenAIAudio.md)
-Executes audio-related tasks using OpenAI's models.
+### [Invoke-OpenAIImage](Invoke-OpenAIImage.md)
+Generates or edits images using OpenAI's image generation model.
 
-### [Invoke-OpenAIAudio](Invoke-OpenAIAudio.md)
-Executes audio-related tasks using OpenAI's models.
+### [Invoke-OpenAIText](Invoke-OpenAIText.md)
+Generates completions for text prompts using OpenAI's language model.
 
-### [Invoke-OpenAIAudio](Invoke-OpenAIAudio.md)
-Executes audio-related tasks using OpenAI's models.
+### [Set-OpenAIKey](Set-OpenAIKey.md)
+Sets the OpenAI API key for authentication.
 
