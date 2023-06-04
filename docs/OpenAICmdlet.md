@@ -1,4 +1,4 @@
-﻿---
+---
 Module Name: OpenAICmdlet
 Module Guid: 00000000-0000-0000-0000-000000000000
 Download Help Link: {{ Update Download Link }}
@@ -8,21 +8,21 @@ Locale: en-US
 
 # OpenAICmdlet Module
 ## Description
-{{ Fill in the Description }}
+This PowerShell module provides essential cmdlets for seamless interaction with OpenAI's models.
 
 ## OpenAICmdlet Cmdlets
 ### [Get-OpenAIKey](Get-OpenAIKey.md)
-{{ Fill in the Description }}
+Retrieves the OpenAI API key from the specified file path.
 
 ### [Invoke-OpenAIAudio](Invoke-OpenAIAudio.md)
-{{ Fill in the Description }}
+Executes audio-related tasks using OpenAI's models.
 
-### [Invoke-OpenAIImage](Invoke-OpenAIImage.md)
-{{ Fill in the Description }}
+### [Invoke-OpenAIAudio](Invoke-OpenAIAudio.md)
+Executes audio-related tasks using OpenAI's models.
 
-### [Invoke-OpenAIText](Invoke-OpenAIText.md)
-{{ Fill in the Description }}
+### [Invoke-OpenAIAudio](Invoke-OpenAIAudio.md)
+Executes audio-related tasks using OpenAI's models.
 
-### [Set-OpenAIKey](Set-OpenAIKey.md)
-{{ Fill in the Description }}
+### [Invoke-OpenAIAudio](Invoke-OpenAIAudio.md)
+Executes audio-related tasks using OpenAI's models.
 

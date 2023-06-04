@@ -30,7 +30,7 @@
     Copyright         = '(c) Nuo Chen. All rights reserved.'
 
     # Description of the functionality provided by this module
-    Description       = 'A PowerShell module with basic cmdlets for interacting with OpenAI''s models through their API'
+    Description       = "A PowerShell module with basic cmdlets for interacting with OpenAI's models through their API"
 
     # Minimum version of the PowerShell engine required by this module
     # PowerShellVersion = ''

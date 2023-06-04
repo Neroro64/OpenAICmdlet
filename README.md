@@ -1,10 +1,10 @@
 # OpenAI Cmdlet
-A simple PowerShell cmdlet for invoking OpenAI API to perfom and automate text, image and speect-to-text related tasks. 
+A simple PowerShell cmdlet for invoking OpenAI API to perfom and text, image and speech-to-text related tasks. 
 
 ```powershell
 # The following command is equivalent to 
-# Invoke-OpenAIText -Prompt "..." -Mode:ChatGPT -Temperature:0 -Samples:1
-ai @"
+# Invoke-OpenAIText -Prompt "..." -Mode:ChatCompletion -Temperature:1 -Samples:1
+igpt @"
 > Convert this text to a programmatic command:
 >
 > Example: Ask Constance if we need some bread
@@ -33,10 +33,17 @@ For more usage examples, please check [OpenAI API Examples](https://platform.ope
 - [PowerShell >= 7.3.3](https://github.com/PowerShell/powershell/releases)
 
 ## Getting started
-### Import the module
+### Install the module from PowerShell Gallery
+```powershell
+Install-Module OpenAICmdlet
+Import-Module OpenAICmdlet
+```
+
+### Build the module locally
 ```powershell
 git clone git@github.com:Neroro64/OpenAICmdlet.git
-Import-Module OpenAICmdlet/PSCmdlet/InvokeOpenAI.psd1
+./build.ps1 -OutputPath Artifacts -Configuration Release
+Import-Module Artifacts/OpenAICmdlet.dll
 
 # To set the API key
 Set-OpenAIAPIKey
@@ -45,13 +52,13 @@ Set-OpenAIAPIKey
 
 # You add this module to your PowerShell profile, to be auto-imported upon start-up
 # Linux
-Add-Content -Path $Home/.config/powershell/Microsoft.PowerShell_profile.ps1 -Value "Import-Module $((Get-Location).Path)/OpenAICmdlet/PSCmdlet/InvokeOpenAI:psd1"
+Add-Content -Path $Home/.config/powershell/Microsoft.PowerShell_profile.ps1 -Value "Import-Module OpenAICmdlet"
 # Windows
-Add-Content -Path $Home/Documents/PowerShell/Microsoft.PowerShell_profile.ps1 -Value "Import-Module $((Get-Location).Path)/OpenAICmdlet/PSCmdlet/InvokeOpenAI:psd1"
+Add-Content -Path $Home/Documents/PowerShell/Microsoft.PowerShell_profile.ps1 -Value "Import-Module OpenAICmdlet"
 ```
 
 ## Usage
-NOTE: All responses in the PowerShell session are automatically stored in `$Global:OpenAIResponses` and the last chat conversation is stored in `$Global:LastChatGPTConversation`. So you can always review them and save them to disk if necessary.
+NOTE: This module only provides basic PowerShell interface to interact with the API. It does not come with a memory solution to automatically store / resume the conversations. 
 
 Use `Get-Help <CommandName> -Full` to learn more about the syntax of the command and see more examples.
 
@@ -59,52 +66,47 @@ Use `Get-Help <CommandName> -Full` to learn more about the syntax of the command
 You can alwasy preview the content of the API request by appending `-WhatIf` flag to the command (ie. dry-run)
 
 ```powershell
-ai "Generate prompts for creative ai arts" -WhatIf
+igpt "Generate prompts for creative ai arts" -WhatIf
 ```
 
 ```
-What if: Performing the operation "Invoke OpenAI API" on target "Text completion with maximum estimated tokens: 206 => $2E-06".
-What if: Performing the operation "Invoke OpenAI API Request" on target "https://api.openai.com/v1/chat/completions with
+What if: 
+Sending a request to https://api.openai.com/v1/chat/completions
+with API Key from: <API_KEY_PATH>
+estimated cost: 1.4E-05
 ---
-Header : {
-  "Content-Type": "application/json",
-  "Authorization": "Bearer <Your API KEY>"
-}
----
-Body :  {
-  "messages": [
+Request body : {
+  "model":"gpt-3.5-turbo-0301",
+  "messages":[
     {
-      "content": "You are a helpful assistant",
-      "role": "system"
+      "role":"system",
+      "content":"You are a helpful assistant"
     },
     {
-      "content": "Generate prompts for creative ai arts",
-      "role": "user"
+      "role":"user",
+      "content":"Generate prompts for creative ai arts"
     }
   ],
-  "model": "gpt-3.5-turbo",
-  "top_p": 1.0,
-  "max_tokens": 200,
-  "temperature": 0.0,
-  "n": 1
+  "temperature":1,
+  "top_p":1,
+  "max_tokens":200,
+  "n":1
 }
 ---
-Form :  null
----".
 ```
 
-### `Invoke-OpenAIText` (Text completion) [Alias='ai']
+### `Invoke-OpenAIText` (Text completion) [Alias='igpt']
 A simple PowerShell function for invoking OpenAI's API to perform the text related tasks such as
 text/code completion, summarize, explanation etc. (default mode: ChatGPT)
 
 For more details, see https://platform.openai.com/docs/guides/completion
 
-By default, it uses ChatGPT mode (model=`gpt-3.5-turbo`) because it perform similar to `text-davinci-003` on general tasks at 10% of the price.
+By default, it uses ChatGPT mode (model=`gpt-3.5-turbo-0301`) because it perform similar to `text-davinci-003` on general tasks at 10% of the price.
 
 ---
 #### **Text Generation**
 ```powershell
-ai "Generate prompts for creative ai arts"
+igpt "Generate prompts for creative ai arts"
 ```
 ```
 Prompt   : Generate prompts for creative ai arts
@@ -121,7 +123,7 @@ Response : {1. Create an abstract painting inspired by the colors of a sunset.
 ```
 ---
 ```powershell
-ai -Prompt:"Help me learn dotnet Dependency injection" -Temperature:1 -MaxTokens:500 -Samples:1 -StopSequences:"`n"
+igpt -Prompt:"Help me learn dotnet Dependency injection" -Temperature:1 -MaxTokens:500 -Samples:1 -StopSequences:"`n" -OutVariable session
 ```
 >Sure, I can help you with that!
 >
@@ -142,7 +144,7 @@ ai -Prompt:"Help me learn dotnet Dependency injection" -Temperature:1 -MaxTokens
 #### To continue chatting
 
 ```powershell
-ai "Show me more complex examples" -ContinueLastConversation
+igpt "Show me more complex examples" -ContinueSession $session
 ```
 > Sure, here's a more complex example that involves multiple dependencies and configuration:
 > 
@@ -162,7 +164,7 @@ ai "Show me more complex examples" -ContinueLastConversation
 > ...
 
 
-### `Invoke-OpenAIImage` (Image generation) [Alias='aiimg']
+### `Invoke-OpenAIImage` (Image generation) [Alias='idalle']
 A simple PowerShell function for invoking OpenAI's API to perform the image related tasks such as
 image generation from text prompt, image edits and image variation. (default mode: Generation)
 
@@ -171,7 +173,7 @@ For more details, see https://platform.openai.com/docs/guides/images/introductio
 ---
 
 ```powershell
-aiimg "A happy man eating hot dog" | Select Response -First 1 | Start-process
+idalle "A happy man eating hot dog" | Select Response -First 1 | Start-process
 # The response contains an url to the generated image. By pipling this url to Start-Process we can open the link in a browser
 ```
 ![the_generated_image]( resources/a_happy_man_eating_hot_dog.png )
@@ -180,7 +182,7 @@ aiimg "A happy man eating hot dog" | Select Response -First 1 | Start-process
 
 ```powershell
 # Use one of the prompt that we generated above.
-aiimg "Create a landscape painting of a forest in autumn." | Select Response -First 1 | Start-process
+idalle "Create a landscape painting of a forest in autumn." | Select Response -First 1 | Start-process
 ```
 ![the_painting]( resources/generated_img.png )
 
@@ -188,11 +190,11 @@ aiimg "Create a landscape painting of a forest in autumn." | Select Response -Fi
 
 ```powershell
 # Use the generated image as input to generate more variations
-aiimg -Mode:Variation -ImagePath:"resources/generated_img.png" -ImageSize:"256x256" | Select Response -First 1 | Start-process
+idalle -Mode:Variation -ImagePath:"resources/generated_img.png" -ImageSize:"256x256" | Select Response -First 1 | Start-process
 ```
 ![the_painting]( resources/generated_img_variation.png )
 
-### `Invoke-OpenAIAudio` (Speech-to-text) [Alias='aiaudio']
+### `Invoke-OpenAIAudio` (Speech-to-text) [Alias='iwhisper']
 A simple PowerShell function for invoking OpenAI's API to perform the speech-to-text related tasks such as
 transcription and translation. (default mode: Transcription)
 
@@ -201,16 +203,10 @@ For details, see https://platform.openai.com/docs/guides/speech-to-text
 ---
 
 ```powershell
-aiaudio -Mode:Transcription -AudioPath:"resources/f7879738_nohash_0.wav" -AudioLanguage:en
+iwhisper -Mode:Transcription -AudioPath:"resources/f7879738_nohash_0.wav" -AudioLanguage:en
 ```
 
 ```
 Prompt   :
 Response : {down,}
-```
-
-## Tests
-```powershell
-# To run the unit tests
-Invoke-Pester PSCmdlet/Tests/InvokeOpenAI.Tests.ps1 -Output Detailed
 ```

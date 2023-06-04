@@ -17,7 +17,7 @@ The second header should have no spaces.
 ```
 
 # SHORT DESCRIPTION
-{{ Short Description Placeholder }}
+This PowerShell module provides essential cmdlets for seamless interaction with OpenAI's models.
 
 ```
 ABOUT TOPIC NOTE:
@@ -27,31 +27,30 @@ The generated about topic will be encoded UTF-8.
 ```
 
 # LONG DESCRIPTION
-{{ Long Description Placeholder }}
+The `OpenAICmdlet` PowerShell module offers a comprehensive set of cmdlets designed to facilitate effortless integration with OpenAI's powerful models. With this module, you gain access to essential functionalities through a range of versatile cmdlets.
 
-## Optional Subtopics
-{{ Optional Subtopic Placeholder }}
+The 'Get-OpenAIKey' cmdlet allows you to retrieve the OpenAI API key currently set in your environment, providing seamless access to OpenAI's services.
+
+By utilizing the 'Set-OpenAIKey' cmdlet, you can easily configure and update your OpenAI API key, ensuring uninterrupted connectivity to OpenAI's models.
+
+Harness the power of language generation with the 'Invoke-OpenAIText' cmdlet, which enables you to generate text using OpenAI's models. Effortlessly create and customize content for various applications such as chatbots, language translation, and text completion.
+
+With the 'Invoke-OpenAIImage' cmdlet, effortlessly generate and manipulate images using OpenAI's models. From artistic style transfer to content generation, this cmdlet unlocks a world of creative possibilities.
+
+For audio-related tasks, the 'Invoke-OpenAIAudio' cmdlet provides seamless integration with OpenAI's models, allowing you to generate, modify, and enhance audio content. Whether it's text-to-speech conversion or translation, this cmdlet offers versatility and flexibility.
+
 
 # EXAMPLES
-{{ Code or descriptive examples of how to leverage the functions described. }}
-
-# NOTE
-{{ Note Placeholder - Additional information that a user needs to know.}}
-
-# TROUBLESHOOTING NOTE
-{{ Troubleshooting Placeholder - Warns users of bugs}}
-
-{{ Explains behavior that is likely to change with fixes }}
-
-# SEE ALSO
-{{ See also placeholder }}
-
-{{ You can also list related articles, blogs, and video URLs. }}
-
-# KEYWORDS
-{{List alternate names or titles for this topic that readers might use.}}
-
-- {{ Keyword Placeholder }}
-- {{ Keyword Placeholder }}
-- {{ Keyword Placeholder }}
-- {{ Keyword Placeholder }}
+## Text generation
+```powershell
+(igpt) -> Invoke-OpenAIText "Generate prompts for creative ai arts"
+```
+## Image generation
+```powershell
+(idalle) -> Invoke-OpenAIImage "A happy man eating hot dog" | Select Response -First 1 | Start-process
+# The response contains an url to the generated image. By pipling this url to Start-Process we can open the link in a browser
+```
+## Audio transcription
+```powershell
+(iwhisper) -> Invoke-OpenAIAudio -AudioPath:"resources/f7879738_nohash_0.wav" -AudioLanguage:en
+```
