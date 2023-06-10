@@ -91,5 +91,5 @@ if (-not $NoHelpFiles) {
     }"
 }
 
-
-
+Copy-Item -Path "$OutputPath/$ModuleName.psd1" -Destination "$PSScriptRoot/Module/$ModuleName.psd1" -Force
+Write-Host "Successfully built the binary module."

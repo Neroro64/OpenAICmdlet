@@ -24,6 +24,8 @@ Prompt   : Convert this text to a programmatic command:
 Response : {send-msg ind ski-store Can I get my skis fixed before I leave on Thursday?}
 ```
 
+For Cmdlet documentation, please check [OpenAICmdlet Documentation](https://neroro64.github.io/OpenAICmdlet/)
+
 For API details, please check [OpenAI API Documentation](https://platform.openai.com/docs/introduction/overview)
 
 For more usage examples, please check [OpenAI API Examples](https://platform.openai.com/examples)
